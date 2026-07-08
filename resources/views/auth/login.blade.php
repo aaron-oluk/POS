@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>Sign in — {{ config('app.name') }}</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+@vite(['resources/css/app.css'])
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="sidebar-logo">N</div>
+      <h1>{{ config('app.name') }}</h1>
+      <p>Sign in to your terminal</p>
+    </div>
+
+    @if ($errors->any())
+      <div class="login-error">{{ $errors->first() }}</div>
+    @endif
+
+    <form method="POST" action="{{ route('login') }}">
+      @csrf
+      <div class="input-group" style="margin-bottom:16px;">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" class="input-field" value="{{ old('email') }}" placeholder="you@nexuscoffee.com" required autofocus>
+      </div>
+      <div class="input-group" style="margin-bottom:20px;">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" class="input-field" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;">
+        <i class="fa-solid fa-right-to-bracket"></i> Sign In
+      </button>
+    </form>
+
+    <div class="login-hint">Demo: sarah@nexuscoffee.com / password</div>
+  </div>
+</div>
+</body>
+</html>
