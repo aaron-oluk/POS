@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('email')->nullable();
             $table->string('address')->nullable();
             $table->string('currency', 8)->default('USD');
+            $table->string('currency_symbol', 8)->default('$');
             $table->string('timezone')->default('America/New_York');
             // Appearance
             $table->boolean('dark_mode')->default(true);

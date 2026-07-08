@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\CurrencyDetector;
 use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
@@ -30,16 +31,13 @@ class Setting extends Model
 
     public static function current(): self
     {
-        return once(fn () => static::query()->firstOrCreate(['id' => 1]));
-    }
+        return once(function () {
+            $detected = CurrencyDetector::detect();
 
-    public function currencySymbol(): string
-    {
-        return match ($this->currency) {
-            'EUR' => '€',
-            'GBP' => '£',
-            'JPY' => '¥',
-            default => '$',
-        };
+            return static::query()->firstOrCreate(['id' => 1], [
+                'currency' => $detected['code'],
+                'currency_symbol' => $detected['symbol'],
+            ]);
+        });
     }
 }

@@ -37,7 +37,7 @@
             <div style="display:flex;gap:4px;">
               <button class="btn btn-secondary btn-sm btn-icon" onclick="showOrderDetail({{ $o->id }})" title="View"><i class="fa-solid fa-eye" style="font-size:11px;"></i></button>
               @if ($o->status === 'completed')
-              <form method="POST" action="{{ route('orders.refund', $o) }}" onsubmit="return confirm('Refund {{ $o->order_number }}?');">
+              <form method="POST" action="{{ route('orders.refund', $o) }}" data-confirm="Refund {{ $o->order_number }}? This will mark it as refunded." data-confirm-title="Refund Order" data-confirm-label="Refund">
                 @csrf @method('PATCH')
                 <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Refund"><i class="fa-solid fa-rotate-left" style="font-size:11px;"></i></button>
               </form>

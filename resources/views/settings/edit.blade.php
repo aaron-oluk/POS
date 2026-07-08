@@ -28,8 +28,11 @@
       <div class="input-group"><label>Address</label><input type="text" class="input-field" name="address" value="{{ $settings->address }}"></div>
       <div class="input-group"><label>Currency</label>
         <select class="input-field" name="currency">
-          @foreach (['USD' => 'USD ($)', 'EUR' => 'EUR (€)', 'GBP' => 'GBP (£)', 'JPY' => 'JPY (¥)'] as $code => $label)
-            <option value="{{ $code }}" {{ $settings->currency === $code ? 'selected' : '' }}>{{ $label }}</option>
+          @if (! array_key_exists($settings->currency, $currencies))
+            <option value="{{ $settings->currency }}" selected>{{ $settings->currency }} ({{ $settings->currency_symbol }}) — detected</option>
+          @endif
+          @foreach ($currencies as $code => $c)
+            <option value="{{ $code }}" {{ $settings->currency === $code ? 'selected' : '' }}>{{ $code }} ({{ $c['symbol'] }}) — {{ $c['name'] }}</option>
           @endforeach
         </select>
       </div>

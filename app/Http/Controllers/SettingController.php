@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Setting;
+use App\Support\CurrencyDetector;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -15,6 +16,7 @@ class SettingController extends Controller
         return view('settings.edit', [
             'settings' => Setting::current(),
             'categories' => Category::orderBy('name')->get(),
+            'currencies' => CurrencyDetector::supportedCurrencies(),
         ]);
     }
 
@@ -31,6 +33,7 @@ class SettingController extends Controller
         $data['dark_mode'] = $request->boolean('dark_mode');
         $data['compact_mode'] = $request->boolean('compact_mode');
         $data['sound_effects'] = $request->boolean('sound_effects');
+        $data['currency_symbol'] = CurrencyDetector::symbolFor($data['currency']);
 
         Setting::current()->update($data);
 

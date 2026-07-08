@@ -60,7 +60,7 @@
           <td>
             <div style="display:flex;gap:4px;">
               <button class="btn btn-secondary btn-sm btn-icon" title="Edit" onclick='openProductModal(@json($p))'><i class="fa-solid fa-pen" style="font-size:11px;"></i></button>
-              <form method="POST" action="{{ route('products.destroy', $p) }}" onsubmit="return confirm('Delete {{ $p->name }}?');">
+              <form method="POST" action="{{ route('products.destroy', $p) }}" data-confirm="Delete {{ $p->name }}? This cannot be undone." data-confirm-title="Delete Product" data-confirm-label="Delete">
                 @csrf @method('DELETE')
                 <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Delete"><i class="fa-solid fa-trash" style="font-size:11px;"></i></button>
               </form>

@@ -46,7 +46,7 @@ All seeded users share the password `password`.
 - **Customers** (`/customers`) — search/tier filters, add/edit. Tier (bronze/silver/gold) and lifetime spend are computed from completed orders, not stored.
 - **Staff** (`/staff`, Admin/Manager only) — add/edit staff, sales/orders performance per person.
 - **Reports** (`/reports`) — today/week/month/year period selector, hourly sales, payment-method mix, staff leaderboard, low-stock alerts.
-- **Settings** (`/settings`, Admin/Manager only) — General/Receipt/Payment/Tax tabs, including per-category tax rate/exemption overrides that feed directly into POS checkout tax calculations.
+- **Settings** (`/settings`, Admin/Manager only) — General/Receipt/Payment/Tax tabs, including per-category tax rate/exemption overrides that feed directly into POS checkout tax calculations. The default currency (USD/EUR/GBP/JPY) is auto-detected on first run from the host machine's system timezone (see `App\Support\CurrencyDetector`), not Laravel's `config('app.timezone')` which is fixed to UTC — override it with the `SYSTEM_TIMEZONE` env var if the host's `/etc/localtime` isn't representative (e.g. in a container), or just change it on the Settings > General tab afterwards.
 
 ## Data model
 

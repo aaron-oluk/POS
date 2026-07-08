@@ -60,9 +60,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===== MODAL OVERLAY DISMISS =====
     document.querySelectorAll('.modal-overlay').forEach((m) => {
         m.addEventListener('click', (e) => {
-            if (e.target === m) m.classList.remove('show');
+            if (e.target !== m) return;
+            m.classList.remove('show');
+            if (m.id === 'confirmModal') resolvePendingConfirm(false);
         });
     });
+
+    // ===== CONFIRM MODAL BUTTONS =====
+    document.getElementById('confirmModalOk')?.addEventListener('click', () => resolvePendingConfirm(true));
+    document.getElementById('confirmModalCancel')?.addEventListener('click', () => resolvePendingConfirm(false));
+    document.getElementById('confirmModalClose')?.addEventListener('click', () => resolvePendingConfirm(false));
 
     // ===== KEYBOARD SHORTCUTS =====
     document.addEventListener('keydown', (e) => {
@@ -72,7 +79,10 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = window.posUrl || '/pos';
         }
         if (e.key === 'Escape') {
-            document.querySelectorAll('.modal-overlay.show').forEach((m) => m.classList.remove('show'));
+            document.querySelectorAll('.modal-overlay.show').forEach((m) => {
+                m.classList.remove('show');
+                if (m.id === 'confirmModal') resolvePendingConfirm(false);
+            });
         }
     });
 });
@@ -117,6 +127,58 @@ window.openModal = function (id) {
 window.closeModal = function (id) {
     document.getElementById(id)?.classList.remove('show');
 };
+
+// ===== CONFIRM DIALOG (replaces native confirm()) =====
+let pendingConfirmResolve = null;
+
+function resolvePendingConfirm(result) {
+    if (!pendingConfirmResolve) return;
+    const resolve = pendingConfirmResolve;
+    pendingConfirmResolve = null;
+    resolve(result);
+}
+
+window.confirmDialog = function (message, options = {}) {
+    const { title = 'Please Confirm', confirmLabel = 'Confirm', danger = true } = options;
+    const modal = document.getElementById('confirmModal');
+    if (!modal) return Promise.resolve(window.confirm(message));
+
+    // Resolve any dialog left hanging (shouldn't normally happen) before opening a new one.
+    resolvePendingConfirm(false);
+
+    document.getElementById('confirmModalTitle').textContent = title;
+    document.getElementById('confirmModalMessage').textContent = message;
+    const okBtn = document.getElementById('confirmModalOk');
+    okBtn.textContent = confirmLabel;
+    okBtn.className = 'btn ' + (danger ? 'btn-danger' : 'btn-primary');
+
+    return new Promise((resolve) => {
+        pendingConfirmResolve = resolve;
+        modal.classList.add('show');
+    }).then((result) => {
+        modal.classList.remove('show');
+        return result;
+    });
+};
+
+// ===== GENERIC "CONFIRM BEFORE SUBMIT" FORMS =====
+// Add data-confirm="message" (optionally data-confirm-title / data-confirm-label)
+// to any <form> for a styled confirmation instead of the browser's native dialog.
+document.addEventListener('submit', async (e) => {
+    const form = e.target.closest('form[data-confirm]');
+    if (!form || form.dataset.confirmed === 'true') return;
+    e.preventDefault();
+
+    const ok = await window.confirmDialog(form.dataset.confirm, {
+        title: form.dataset.confirmTitle || 'Please Confirm',
+        confirmLabel: form.dataset.confirmLabel || 'Confirm',
+    });
+
+    if (ok) {
+        form.dataset.confirmed = 'true';
+        form.submit();
+    }
+});
 
 // ===== FLASH MESSAGES FROM SESSION (rendered as data attrs in layout) =====
 document.addEventListener('DOMContentLoaded', () => {

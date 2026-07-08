@@ -3,19 +3,23 @@
 namespace Database\Seeders;
 
 use App\Models\Setting;
+use App\Support\CurrencyDetector;
 use Illuminate\Database\Seeder;
 
 class SettingSeeder extends Seeder
 {
     public function run(): void
     {
+        $currency = CurrencyDetector::detect();
+
         Setting::create([
             'id' => 1,
             'store_name' => 'Nexus Coffee & Co.',
             'phone' => '+1 (555) 123-4567',
             'email' => 'hello@nexuscoffee.com',
             'address' => '123 Main Street, Downtown',
-            'currency' => 'USD',
+            'currency' => $currency['code'],
+            'currency_symbol' => $currency['symbol'],
             'timezone' => 'America/New_York',
             'dark_mode' => true,
             'compact_mode' => false,

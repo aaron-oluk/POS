@@ -87,6 +87,22 @@
 <div class="toast-container" id="toastContainer"></div>
 <div id="flashData" data-success="{{ session('success') }}" data-error="{{ session('error') }}" style="display:none;"></div>
 
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <h3 id="confirmModalTitle">Please Confirm</h3>
+      <button type="button" class="modal-close" id="confirmModalClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p id="confirmModalMessage" style="font-size:13px;color:var(--fg);line-height:1.5;"></p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" id="confirmModalCancel">Cancel</button>
+      <button type="button" class="btn btn-danger" id="confirmModalOk">Confirm</button>
+    </div>
+  </div>
+</div>
+
 @stack('modals')
 @stack('scripts')
 </body>
