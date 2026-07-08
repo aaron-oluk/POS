@@ -42,10 +42,10 @@
     <div>
       @forelse ($staffPerformance as $i => $s)
       <div style="display:flex;align-items:center;gap:12px;padding:10px 0;{{ $i < $staffPerformance->count() - 1 ? 'border-bottom:1px solid var(--border);' : '' }}">
-        <div style="width:24px;font-family:'Space Grotesk';font-weight:700;color:{{ $i === 0 ? 'var(--accent)' : ($i === 1 ? 'var(--fg-muted)' : ($i === 2 ? '#cd7f32' : 'var(--fg-dim)')) }};font-size:14px;">#{{ $i + 1 }}</div>
+        <div style="width:24px;font-family:'Figtree';font-weight:700;color:{{ $i === 0 ? 'var(--accent)' : ($i === 1 ? 'var(--fg-muted)' : ($i === 2 ? '#cd7f32' : 'var(--fg-dim)')) }};font-size:14px;">#{{ $i + 1 }}</div>
         <img src="https://picsum.photos/seed/{{ $s->avatar_seed }}/60/60.jpg" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
         <div style="flex:1;"><div style="font-size:13px;font-weight:600;">{{ $s->name }}</div><div style="font-size:11px;color:var(--fg-muted);">{{ ucfirst($s->role) }}</div></div>
-        <div style="text-align:right;"><div style="font-family:'Space Grotesk';font-weight:700;">${{ number_format($s->orders_sum_total ?? 0, 0) }}</div><div style="font-size:11px;color:var(--fg-muted);">{{ $s->orders_count }} orders</div></div>
+        <div style="text-align:right;"><div style="font-family:'Figtree';font-weight:700;">${{ number_format($s->orders_sum_total ?? 0, 0) }}</div><div style="font-size:11px;color:var(--fg-muted);">{{ $s->orders_count }} orders</div></div>
       </div>
       @empty
       <div style="text-align:center;color:var(--fg-muted);padding:16px;">No staff data</div>

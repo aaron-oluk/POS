@@ -67,9 +67,9 @@
         <tbody>
           @forelse ($recentTransactions as $o)
           <tr>
-            <td style="font-weight:600;font-family:'Space Grotesk';">{{ $o->order_number }}</td>
+            <td style="font-weight:600;font-family:'Figtree';">{{ $o->order_number }}</td>
             <td>{{ $o->customer?->full_name ?? 'Walk-in' }}</td>
-            <td style="font-family:'Space Grotesk';font-weight:600;">${{ number_format($o->total, 2) }}</td>
+            <td style="font-family:'Figtree';font-weight:600;">${{ number_format($o->total, 2) }}</td>
             <td><span class="badge badge-{{ ['completed'=>'success','pending'=>'warning','refunded'=>'danger','cancelled'=>'muted'][$o->status] }}">{{ ucfirst($o->status) }}</span></td>
           </tr>
           @empty
@@ -92,7 +92,7 @@
           <div style="font-size:13px;font-weight:600;">{{ $p->product_name }}</div>
           <div class="progress-bar" style="margin-top:6px;"><div class="progress-fill" style="width:{{ round($p->qty / $maxQty * 100) }}%;background:var(--accent);"></div></div>
         </div>
-        <div style="text-align:right;"><div style="font-family:'Space Grotesk';font-weight:700;">{{ $p->qty }}</div><div style="font-size:11px;color:var(--fg-muted);">sold</div></div>
+        <div style="text-align:right;"><div style="font-family:'Figtree';font-weight:700;">{{ $p->qty }}</div><div style="font-size:11px;color:var(--fg-muted);">sold</div></div>
       </div>
       @empty
       <div style="text-align:center;color:var(--fg-muted);padding:16px;">No sales yet</div>

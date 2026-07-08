@@ -26,10 +26,10 @@
       <tbody>
         @forelse ($orders as $o)
         <tr>
-          <td style="font-weight:600;font-family:'Space Grotesk';cursor:pointer;color:var(--accent);" onclick="showOrderDetail({{ $o->id }})">{{ $o->order_number }}</td>
+          <td style="font-weight:600;font-family:'Figtree';cursor:pointer;color:var(--accent);" onclick="showOrderDetail({{ $o->id }})">{{ $o->order_number }}</td>
           <td>{{ $o->customer?->full_name ?? 'Walk-in' }}</td>
           <td>{{ $o->items()->count() }} item{{ $o->items()->count() > 1 ? 's' : '' }}</td>
-          <td style="font-family:'Space Grotesk';font-weight:600;">${{ number_format($o->total, 2) }}</td>
+          <td style="font-family:'Figtree';font-weight:600;">${{ number_format($o->total, 2) }}</td>
           <td><span class="badge badge-muted">{{ \App\Models\Order::paymentLabel($o->payment_method) }}</span></td>
           <td><span class="badge badge-{{ ['completed'=>'success','pending'=>'warning','refunded'=>'danger','cancelled'=>'muted'][$o->status] }}">{{ ucfirst($o->status) }}</span></td>
           <td style="color:var(--fg-muted);font-size:12px;">{{ $o->created_at->format('M j, g:i A') }}</td>
@@ -80,7 +80,7 @@ async function showOrderDetail(id) {
     const dateStr = new Date(o.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     document.getElementById('orderDetailContent').innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <div><div style="font-family:'Space Grotesk';font-size:20px;font-weight:700;">${o.order_number}</div><div style="font-size:12px;color:var(--fg-muted);">${dateStr}</div></div>
+        <div><div style="font-family:'Figtree';font-size:20px;font-weight:700;">${o.order_number}</div><div style="font-size:12px;color:var(--fg-muted);">${dateStr}</div></div>
         <span class="badge ${statusBadge}" style="font-size:13px;padding:5px 14px;">${o.status.charAt(0).toUpperCase() + o.status.slice(1)}</span>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
@@ -97,7 +97,7 @@ async function showOrderDetail(id) {
         ${o.discount_amount > 0 ? `<div style="font-size:13px;color:var(--fg-muted);">Discount: -$${o.discount_amount.toFixed(2)}</div>` : ''}
         <div style="font-size:13px;color:var(--fg-muted);">Tax: $${o.tax.toFixed(2)}</div>
         ${o.tip > 0 ? `<div style="font-size:13px;color:var(--fg-muted);">Tip: $${o.tip.toFixed(2)}</div>` : ''}
-        <div style="font-family:'Space Grotesk';font-size:22px;font-weight:700;margin-top:4px;">$${o.total.toFixed(2)}</div>
+        <div style="font-family:'Figtree';font-size:22px;font-weight:700;margin-top:4px;">$${o.total.toFixed(2)}</div>
       </div>
     `;
     openModal('orderDetailModal');

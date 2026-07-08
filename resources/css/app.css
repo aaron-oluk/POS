@@ -50,13 +50,13 @@
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
-  font-family:'DM Sans',sans-serif;
+  font-family:'Figtree',sans-serif;
   background:var(--bg);
   color:var(--fg);
   overflow:hidden;
   height:100vh;
 }
-h1,h2,h3,h4 { font-family:'Space Grotesk',sans-serif; }
+h1,h2,h3,h4 { font-family:'Figtree',sans-serif; }
 ::-webkit-scrollbar { width:6px; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--fg-dim); border-radius:3px; }
@@ -87,7 +87,7 @@ h1,h2,h3,h4 { font-family:'Space Grotesk',sans-serif; }
   font-weight:900; font-size:16px; color:#0f1117;
   flex-shrink:0;
 }
-.sidebar-brand { font-family:'Space Grotesk'; font-weight:700; font-size:18px; white-space:nowrap; overflow:hidden; }
+.sidebar-brand { font-family:'Figtree'; font-weight:700; font-size:18px; white-space:nowrap; overflow:hidden; }
 .sidebar.collapsed .sidebar-brand { display:none; }
 .sidebar-nav { flex:1; padding:12px 8px; overflow-y:auto; }
 .nav-section { margin-bottom:8px; }
@@ -193,7 +193,7 @@ h1,h2,h3,h4 { font-family:'Space Grotesk',sans-serif; }
   font-size:18px; flex-shrink:0;
 }
 .stat-label { font-size:12px; color:var(--fg-muted); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px; }
-.stat-value { font-family:'Space Grotesk'; font-size:26px; font-weight:700; line-height:1.2; }
+.stat-value { font-family:'Figtree'; font-size:26px; font-weight:700; line-height:1.2; }
 .stat-change { font-size:12px; font-weight:600; margin-top:4px; display:flex; align-items:center; gap:4px; }
 .stat-change.up { color:var(--success); }
 .stat-change.down { color:var(--danger); }
@@ -296,7 +296,7 @@ textarea.input-field { height:auto; padding:10px 14px; resize:vertical; }
 }
 .pos-item-img img { width:100%; height:100%; object-fit:cover; }
 .pos-item-name { font-size:13px; font-weight:600; line-height:1.3; }
-.pos-item-price { font-family:'Space Grotesk'; font-size:16px; font-weight:700; color:var(--accent); }
+.pos-item-price { font-family:'Figtree'; font-size:16px; font-weight:700; color:var(--accent); }
 .pos-item-stock { font-size:10px; color:var(--fg-dim); }
 .pos-cart {
   background:var(--bg-elevated); border-left:1px solid var(--border);
@@ -328,7 +328,7 @@ textarea.input-field { height:auto; padding:10px 14px; resize:vertical; }
 }
 .pos-cart-qty button:hover { border-color:var(--accent); color:var(--accent); }
 .pos-cart-qty span { font-size:13px; font-weight:700; min-width:20px; text-align:center; }
-.pos-cart-item-total { font-family:'Space Grotesk'; font-size:14px; font-weight:700; min-width:60px; text-align:right; }
+.pos-cart-item-total { font-family:'Figtree'; font-size:14px; font-weight:700; min-width:60px; text-align:right; }
 .pos-cart-item-remove {
   background:none; border:none; color:var(--fg-dim); cursor:pointer;
   font-size:12px; padding:4px; transition:color var(--transition);
@@ -342,7 +342,7 @@ textarea.input-field { height:auto; padding:10px 14px; resize:vertical; }
 .pos-cart-empty i { font-size:40px; margin-bottom:8px; }
 .pos-cart-footer { padding:16px 20px; border-top:1px solid var(--border); }
 .pos-cart-row { display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px; }
-.pos-cart-row.total { font-size:18px; font-weight:700; font-family:'Space Grotesk'; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); }
+.pos-cart-row.total { font-size:18px; font-weight:700; font-family:'Figtree'; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); }
 .pos-cart-actions { display:flex; gap:8px; margin-top:16px; }
 .pos-cart-actions .btn { flex:1; justify-content:center; }
 
@@ -389,7 +389,7 @@ textarea.input-field { height:auto; padding:10px 14px; resize:vertical; }
 .pay-method span { font-size:12px; font-weight:600; }
 .pay-amount-display { text-align:center; margin-bottom:20px; }
 .pay-amount-display .label { font-size:12px; color:var(--fg-muted); margin-bottom:4px; }
-.pay-amount-display .amount { font-family:'Space Grotesk'; font-size:42px; font-weight:700; color:var(--accent); }
+.pay-amount-display .amount { font-family:'Figtree'; font-size:42px; font-weight:700; color:var(--accent); }
 
 /* Receipt */
 .receipt { background:#fff; color:#111; padding:24px; font-family:monospace; font-size:12px; max-width:320px; margin:0 auto; }
@@ -478,7 +478,7 @@ textarea.input-field { height:auto; padding:10px 14px; resize:vertical; }
 .key {
   height:48px; border-radius:var(--radius-sm); border:1px solid var(--border);
   background:var(--bg-card); color:var(--fg); font-size:18px;
-  font-family:'Space Grotesk'; font-weight:600; cursor:pointer;
+  font-family:'Figtree'; font-weight:600; cursor:pointer;
   transition:all var(--transition);
 }
 .key:hover { background:var(--bg-hover); border-color:var(--fg-dim); }

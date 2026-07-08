@@ -20,8 +20,8 @@
       <span class="badge {{ $s->active ? 'badge-success' : 'badge-muted' }}">{{ $s->active ? 'Active' : 'Inactive' }}</span>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
-      <div class="card" style="padding:10px;background:var(--bg-hover);"><div style="font-size:10px;color:var(--fg-dim);">Sales</div><div style="font-family:'Space Grotesk';font-weight:700;font-size:14px;">${{ number_format(($s->orders_sum_total ?? 0) / 1000, 1) }}k</div></div>
-      <div class="card" style="padding:10px;background:var(--bg-hover);"><div style="font-size:10px;color:var(--fg-dim);">Orders</div><div style="font-family:'Space Grotesk';font-weight:700;font-size:14px;">{{ $s->orders_count }}</div></div>
+      <div class="card" style="padding:10px;background:var(--bg-hover);"><div style="font-size:10px;color:var(--fg-dim);">Sales</div><div style="font-family:'Figtree';font-weight:700;font-size:14px;">${{ number_format(($s->orders_sum_total ?? 0) / 1000, 1) }}k</div></div>
+      <div class="card" style="padding:10px;background:var(--bg-hover);"><div style="font-size:10px;color:var(--fg-dim);">Orders</div><div style="font-family:'Figtree';font-weight:700;font-size:14px;">{{ $s->orders_count }}</div></div>
     </div>
     <div style="display:flex;gap:6px;justify-content:center;">
       <button class="btn btn-secondary btn-sm" onclick='openStaffModal(@json($s))'><i class="fa-solid fa-pen"></i> Edit</button>
