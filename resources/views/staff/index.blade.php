@@ -8,7 +8,7 @@
     <h1 class="page-title">Staff</h1>
     <p class="page-subtitle">Manage employees and their access levels</p>
   </div>
-  <button class="btn btn-primary btn-sm" onclick="openStaffModal()"><i class="fa-solid fa-user-plus"></i> Add Staff</button>
+  <button class="btn btn-primary btn-sm" onclick="openStaffModal()"><i class="bx bxs-user-plus"></i> Add Staff</button>
 </div>
 <div class="card">
   <div class="table-wrap">
@@ -31,7 +31,7 @@
           <td style="font-family:'Figtree';font-weight:600;">@money($s->orders_sum_total ?? 0)</td>
           <td style="font-family:'Figtree';font-weight:600;">{{ $s->orders_count }}</td>
           <td>
-            <button class="btn btn-secondary btn-sm btn-icon" title="Edit" onclick='openStaffModal(@json($s))'><i class="fa-solid fa-pen" style="font-size:11px;"></i></button>
+            <button class="btn btn-secondary btn-sm btn-icon" title="Edit" onclick='openStaffModal(@json($s))'><i class="bx bxs-pencil" style="font-size:11px;"></i></button>
           </td>
         </tr>
         @empty
@@ -48,7 +48,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3 id="staffModalTitle">Add Staff Member</h3>
-      <button class="modal-close" onclick="closeModal('staffModal')"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close" onclick="closeModal('staffModal')"><i class="bx bx-x"></i></button>
     </div>
     <form id="staffForm" method="POST" action="{{ route('staff.store') }}">
       @csrf
@@ -75,7 +75,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeModal('staffModal')">Cancel</button>
-        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Save Staff</button>
+        <button type="submit" class="btn btn-primary"><i class="bx bx-check"></i> Save Staff</button>
       </div>
     </form>
   </div>

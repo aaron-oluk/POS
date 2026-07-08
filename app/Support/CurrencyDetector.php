@@ -123,6 +123,45 @@ class CurrencyDetector
         return in_array($code, static::ZERO_DECIMAL, true) ? 0 : 2;
     }
 
+    /**
+     * Detect the host machine's real IANA timezone (not Laravel's app
+     * timezone, which is usually forced to UTC), falling back to UTC if
+     * detection fails or yields something PHP doesn't recognize.
+     */
+    public static function detectTimezone(): string
+    {
+        $id = static::systemTimezoneId();
+
+        if ($id && in_array($id, \DateTimeZone::listIdentifiers(), true)) {
+            return $id;
+        }
+
+        return 'UTC';
+    }
+
+    /**
+     * Every IANA timezone PHP knows about, grouped by continent/region for
+     * a a Settings dropdown: [group => [id => "id (UTC+03:00)"]].
+     */
+    public static function groupedTimezones(): array
+    {
+        $groups = [];
+
+        foreach (\DateTimeZone::listIdentifiers() as $id) {
+            if (! str_contains($id, '/')) {
+                continue;
+            }
+
+            [$group] = explode('/', $id, 2);
+            $offset = (new \DateTime('now', new \DateTimeZone($id)))->format('P');
+            $groups[$group][$id] = "{$id} (UTC{$offset})";
+        }
+
+        ksort($groups);
+
+        return $groups;
+    }
+
     protected static function currencyForCountry(string $country): ?array
     {
         $fmt = new NumberFormatter('en_'.$country, NumberFormatter::CURRENCY);

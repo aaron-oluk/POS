@@ -99,7 +99,7 @@ function getCartTotals() {
 function renderCart() {
     const container = document.getElementById('posCartItems');
     if (cart.length === 0) {
-        container.innerHTML = '<div class="pos-cart-empty"><i class="fa-solid fa-basket-shopping"></i><div>Cart is empty</div><div style="font-size:11px;">Tap a product to add it</div></div>';
+        container.innerHTML = '<div class="pos-cart-empty"><i class="bx bxs-basket"></i><div>Cart is empty</div><div style="font-size:11px;">Tap a product to add it</div></div>';
     } else {
         container.innerHTML = cart.map((c) => `
             <div class="pos-cart-item">
@@ -108,12 +108,12 @@ function renderCart() {
                     <div class="pos-cart-item-price">${window.formatMoney(c.product.price)} each</div>
                 </div>
                 <div class="pos-cart-qty">
-                    <button data-id="${c.product.id}" data-delta="-1"><i class="fa-solid fa-minus" style="font-size:10px;"></i></button>
+                    <button data-id="${c.product.id}" data-delta="-1"><i class="bx bx-minus" style="font-size:10px;"></i></button>
                     <span>${c.qty}</span>
-                    <button data-id="${c.product.id}" data-delta="1"><i class="fa-solid fa-plus" style="font-size:10px;"></i></button>
+                    <button data-id="${c.product.id}" data-delta="1"><i class="bx bx-plus" style="font-size:10px;"></i></button>
                 </div>
                 <div class="pos-cart-item-total">${window.formatMoney(c.product.price * c.qty)}</div>
-                <button class="pos-cart-item-remove" data-remove="${c.product.id}"><i class="fa-solid fa-xmark"></i></button>
+                <button class="pos-cart-item-remove" data-remove="${c.product.id}"><i class="bx bx-x"></i></button>
             </div>
         `).join('');
         container.querySelectorAll('[data-delta]').forEach((btn) => {

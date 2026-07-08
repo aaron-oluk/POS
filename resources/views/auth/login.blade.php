@@ -6,7 +6,7 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Sign in — {{ config('app.name') }}</title>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
 @vite(['resources/css/app.css'])
 </head>
 <body>
@@ -34,7 +34,7 @@
         <input type="password" id="password" name="password" class="input-field" placeholder="••••••••" required>
       </div>
       <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;">
-        <i class="fa-solid fa-right-to-bracket"></i> Sign In
+        <i class="bx bxs-log-in"></i> Sign In
       </button>
     </form>
 

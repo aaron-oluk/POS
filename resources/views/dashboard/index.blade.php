@@ -9,33 +9,33 @@
     <p class="page-subtitle">Here's what's happening at your store today</p>
   </div>
   <div style="display:flex;gap:8px;">
-    <a href="{{ route('pos.index') }}" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> New Sale</a>
+    <a href="{{ route('pos.index') }}" class="btn btn-primary btn-sm"><i class="bx bx-plus"></i> New Sale</a>
   </div>
 </div>
 
 @php
   $fmtChange = function ($v) {
     $cls = $v >= 0 ? 'up' : 'down';
-    $icon = $v >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
-    return "<span class=\"stat-change $cls\"><i class=\"fa-solid $icon\"></i> ".number_format(abs($v), 1)."% vs yesterday</span>";
+    $icon = $v >= 0 ? 'bx-trending-up' : 'bx-trending-down';
+    return "<span class=\"stat-change $cls\"><i class=\"bx $icon\"></i> ".number_format(abs($v), 1)."% vs yesterday</span>";
   };
 @endphp
 
 <div class="grid grid-4" style="margin-bottom:24px;">
   <div class="card stat-card">
-    <div class="stat-icon" style="background:var(--accent-dim);color:var(--accent);"><i class="fa-solid fa-dollar-sign"></i></div>
+    <div class="stat-icon" style="background:var(--accent-dim);color:var(--accent);"><i class="bx bxs-dollar-circle"></i></div>
     <div><div class="stat-label">Today's Revenue</div><div class="stat-value">@money($todayRevenue)</div>{!! $fmtChange($revenueChange) !!}</div>
   </div>
   <div class="card stat-card">
-    <div class="stat-icon" style="background:var(--success-dim);color:var(--success);"><i class="fa-solid fa-bag-shopping"></i></div>
+    <div class="stat-icon" style="background:var(--success-dim);color:var(--success);"><i class="bx bxs-shopping-bag"></i></div>
     <div><div class="stat-label">Today's Orders</div><div class="stat-value">{{ $todayCount }}</div>{!! $fmtChange($ordersChange) !!}</div>
   </div>
   <div class="card stat-card">
-    <div class="stat-icon" style="background:var(--info-dim);color:var(--info);"><i class="fa-solid fa-cart-shopping"></i></div>
+    <div class="stat-icon" style="background:var(--info-dim);color:var(--info);"><i class="bx bxs-cart-alt"></i></div>
     <div><div class="stat-label">Avg. Order Value</div><div class="stat-value">@money($todayAov)</div>{!! $fmtChange($aovChange) !!}</div>
   </div>
   <div class="card stat-card">
-    <div class="stat-icon" style="background:var(--warning-dim);color:var(--warning);"><i class="fa-solid fa-users"></i></div>
+    <div class="stat-icon" style="background:var(--warning-dim);color:var(--warning);"><i class="bx bxs-group"></i></div>
     <div><div class="stat-label">Customers Today</div><div class="stat-value">{{ $todayCustomers }}</div>{!! $fmtChange($customersChange) !!}</div>
   </div>
 </div>

@@ -39,6 +39,7 @@ class Setting extends Model
                 'currency' => $detected['code'],
                 'currency_symbol' => $detected['symbol'],
                 'exchange_rate' => $detected['rate'],
+                'timezone' => CurrencyDetector::detectTimezone(),
             ]);
         });
     }

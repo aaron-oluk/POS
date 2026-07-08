@@ -38,8 +38,12 @@
       </div>
       <div class="input-group"><label>Timezone</label>
         <select class="input-field" name="timezone">
-          @foreach (['America/New_York' => 'America/New_York (EST)', 'America/Chicago' => 'America/Chicago (CST)', 'America/Los_Angeles' => 'America/Los_Angeles (PST)'] as $tz => $label)
-            <option value="{{ $tz }}" {{ $settings->timezone === $tz ? 'selected' : '' }}>{{ $label }}</option>
+          @foreach ($timezoneGroups as $group => $zones)
+            <optgroup label="{{ $group }}">
+              @foreach ($zones as $tz => $label)
+                <option value="{{ $tz }}" {{ $settings->timezone === $tz ? 'selected' : '' }}>{{ $label }}</option>
+              @endforeach
+            </optgroup>
           @endforeach
         </select>
       </div>
@@ -59,7 +63,7 @@
         <label class="toggle"><input type="checkbox" name="sound_effects" {{ $settings->sound_effects ? 'checked' : '' }}><span class="toggle-slider"></span></label>
       </div>
     </div>
-    <div style="margin-top:16px;"><button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Save Changes</button></div>
+    <div style="margin-top:16px;"><button type="submit" class="btn btn-primary"><i class="bx bx-check"></i> Save Changes</button></div>
   </form>
 </div>
 
@@ -89,7 +93,7 @@
       <div class="settings-row"><div><div class="settings-row-label">Show QR Code</div><div class="settings-row-desc">Display a QR code linking to digital receipt</div></div><label class="toggle"><input type="checkbox" name="show_qr" {{ $settings->show_qr ? 'checked' : '' }}><span class="toggle-slider"></span></label></div>
       <div class="settings-row"><div><div class="settings-row-label">Auto-Print</div><div class="settings-row-desc">Automatically print receipt after payment</div></div><label class="toggle"><input type="checkbox" name="auto_print" {{ $settings->auto_print ? 'checked' : '' }}><span class="toggle-slider"></span></label></div>
     </div>
-    <div style="margin-top:16px;"><button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Save Changes</button></div>
+    <div style="margin-top:16px;"><button type="submit" class="btn btn-primary"><i class="bx bx-check"></i> Save Changes</button></div>
   </form>
 </div>
 
@@ -118,7 +122,7 @@
       </div>
     </div>
     <div class="settings-row"><div><div class="settings-row-label">Prompt for Tips</div><div class="settings-row-desc">Show tip selection on payment screen</div></div><label class="toggle"><input type="checkbox" name="prompt_tips" {{ $settings->prompt_tips ? 'checked' : '' }}><span class="toggle-slider"></span></label></div>
-    <div style="margin-top:16px;"><button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Save Changes</button></div>
+    <div style="margin-top:16px;"><button type="submit" class="btn btn-primary"><i class="bx bx-check"></i> Save Changes</button></div>
   </form>
 </div>
 
@@ -147,7 +151,7 @@
         </tbody>
       </table>
     </div>
-    <div style="margin-top:16px;"><button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Save Changes</button></div>
+    <div style="margin-top:16px;"><button type="submit" class="btn btn-primary"><i class="bx bx-check"></i> Save Changes</button></div>
   </form>
 </div>
 @endsection

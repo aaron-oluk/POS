@@ -22,7 +22,7 @@ class SettingSeeder extends Seeder
             'currency' => $currency['code'],
             'currency_symbol' => $currency['symbol'],
             'exchange_rate' => $currency['rate'],
-            'timezone' => 'America/New_York',
+            'timezone' => CurrencyDetector::detectTimezone(),
             'dark_mode' => true,
             'compact_mode' => false,
             'sound_effects' => true,

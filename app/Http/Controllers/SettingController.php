@@ -18,6 +18,7 @@ class SettingController extends Controller
             'settings' => Setting::current(),
             'categories' => Category::orderBy('name')->get(),
             'currencies' => CurrencyDetector::supportedCurrencies(),
+            'timezoneGroups' => CurrencyDetector::groupedTimezones(),
         ]);
     }
 

@@ -12,19 +12,19 @@
     <h1 class="page-title">Customers</h1>
     <p class="page-subtitle">View and manage your customer database</p>
   </div>
-  <button class="btn btn-primary btn-sm" onclick="openCustomerModal()"><i class="fa-solid fa-user-plus"></i> Add Customer</button>
+  <button class="btn btn-primary btn-sm" onclick="openCustomerModal()"><i class="bx bxs-user-plus"></i> Add Customer</button>
 </div>
 
 <div class="grid grid-3" style="margin-bottom:20px;">
-  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--accent-dim);color:var(--accent);width:40px;height:40px;font-size:15px;"><i class="fa-solid fa-users"></i></div><div><div class="stat-label">Total Customers</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $totalCustomers }}</div></div></div>
-  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--warning-dim);color:var(--warning);width:40px;height:40px;font-size:15px;"><i class="fa-solid fa-crown"></i></div><div><div class="stat-label">Gold Members</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $goldCount }}</div></div></div>
-  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--success-dim);color:var(--success);width:40px;height:40px;font-size:15px;"><i class="fa-solid fa-chart-simple"></i></div><div><div class="stat-label">Avg. Spend</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">@money($avgSpend)</div></div></div>
+  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--accent-dim);color:var(--accent);width:40px;height:40px;font-size:15px;"><i class="bx bxs-group"></i></div><div><div class="stat-label">Total Customers</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $totalCustomers }}</div></div></div>
+  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--warning-dim);color:var(--warning);width:40px;height:40px;font-size:15px;"><i class="bx bxs-crown"></i></div><div><div class="stat-label">Gold Members</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $goldCount }}</div></div></div>
+  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--success-dim);color:var(--success);width:40px;height:40px;font-size:15px;"><i class="bx bxs-bar-chart-alt-2"></i></div><div><div class="stat-label">Avg. Spend</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">@money($avgSpend)</div></div></div>
 </div>
 
 <div class="card">
   <form method="GET" style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
     <div class="topbar-search" style="max-width:280px;flex:1;">
-      <i class="fa-solid fa-magnifying-glass"></i>
+      <i class="bx bxs-search"></i>
       <input type="text" name="q" placeholder="Search customers..." value="{{ $search }}">
     </div>
     <select class="input-field" style="width:auto;height:38px;" name="tier" onchange="this.form.submit()">
@@ -49,10 +49,10 @@
           <td style="color:var(--fg-muted);">{{ $c->phone }}</td>
           <td style="font-family:'Figtree';font-weight:600;">{{ $c->orders_count }}</td>
           <td style="font-family:'Figtree';font-weight:600;">@money($c->total_spent)</td>
-          <td><span class="badge" style="background:{{ $tierColors[$c->tier] }}22;color:{{ $tierColors[$c->tier] }};"><i class="fa-solid fa-crown" style="font-size:9px;"></i> {{ ucfirst($c->tier) }}</span></td>
+          <td><span class="badge" style="background:{{ $tierColors[$c->tier] }}22;color:{{ $tierColors[$c->tier] }};"><i class="bx bxs-crown" style="font-size:9px;"></i> {{ ucfirst($c->tier) }}</span></td>
           <td>
             <div style="display:flex;gap:4px;">
-              <button class="btn btn-secondary btn-sm btn-icon" title="Edit" onclick='openCustomerModal(@json($c))'><i class="fa-solid fa-pen" style="font-size:11px;"></i></button>
+              <button class="btn btn-secondary btn-sm btn-icon" title="Edit" onclick='openCustomerModal(@json($c))'><i class="bx bxs-pencil" style="font-size:11px;"></i></button>
             </div>
           </td>
         </tr>
@@ -71,7 +71,7 @@
   <div class="modal" style="max-width:460px;">
     <div class="modal-header">
       <h3 id="customerModalTitle">Add Customer</h3>
-      <button class="modal-close" onclick="closeModal('customerModal')"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close" onclick="closeModal('customerModal')"><i class="bx bx-x"></i></button>
     </div>
     <form id="customerForm" method="POST" action="{{ route('customers.store') }}">
       @csrf
@@ -86,7 +86,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeModal('customerModal')">Cancel</button>
-        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Save Customer</button>
+        <button type="submit" class="btn btn-primary"><i class="bx bx-check"></i> Save Customer</button>
       </div>
     </form>
   </div>

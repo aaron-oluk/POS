@@ -8,7 +8,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
       <div class="pos-categories" id="posCategories"></div>
       <div class="topbar-search" style="max-width:240px;">
-        <i class="fa-solid fa-magnifying-glass"></i>
+        <i class="bx bxs-search"></i>
         <input type="text" placeholder="Search items..." id="posSearch" aria-label="Search POS items">
       </div>
     </div>
@@ -18,12 +18,12 @@
     <div class="pos-cart-header">
       <h3>Current Order</h3>
       <div style="display:flex;gap:6px;">
-        <button class="btn-icon btn-secondary" id="holdOrderBtn" title="Hold Order"><i class="fa-solid fa-pause"></i></button>
-        <button class="btn-icon btn-danger" id="clearCartBtn" title="Clear Cart"><i class="fa-solid fa-trash"></i></button>
+        <button class="btn-icon btn-secondary" id="holdOrderBtn" title="Hold Order"><i class="bx bx-pause"></i></button>
+        <button class="btn-icon btn-danger" id="clearCartBtn" title="Clear Cart"><i class="bx bxs-trash"></i></button>
       </div>
     </div>
     <div class="pos-cart-items" id="posCartItems">
-      <div class="pos-cart-empty"><i class="fa-solid fa-basket-shopping"></i><div>Cart is empty</div><div style="font-size:11px;">Tap a product to add it</div></div>
+      <div class="pos-cart-empty"><i class="bx bxs-basket"></i><div>Cart is empty</div><div style="font-size:11px;">Tap a product to add it</div></div>
     </div>
     <div class="pos-cart-footer">
       <div class="input-group" style="margin-bottom:10px;">
@@ -40,8 +40,8 @@
       <div class="pos-cart-row"><span style="color:var(--fg-muted)">Discount</span><span id="cartDiscount" style="color:var(--success);">-$0.00</span></div>
       <div class="pos-cart-row total"><span>Total</span><span id="cartTotal">$0.00</span></div>
       <div class="pos-cart-actions">
-        <button class="btn btn-secondary" id="showDiscountBtn"><i class="fa-solid fa-percent"></i> Discount</button>
-        <button class="btn btn-primary btn-lg" id="showPaymentBtn"><i class="fa-solid fa-credit-card"></i> Pay</button>
+        <button class="btn btn-secondary" id="showDiscountBtn"><i class="bx bxs-discount"></i> Discount</button>
+        <button class="btn btn-primary btn-lg" id="showPaymentBtn"><i class="bx bxs-credit-card"></i> Pay</button>
       </div>
     </div>
   </div>
@@ -53,19 +53,19 @@
   <div class="modal">
     <div class="modal-header">
       <h3>Process Payment</h3>
-      <button class="modal-close" onclick="closeModal('paymentModal')"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close" onclick="closeModal('paymentModal')"><i class="bx bx-x"></i></button>
     </div>
     <div class="modal-body">
       <div class="pay-amount-display"><div class="label">Amount Due</div><div class="amount" id="payAmount">$0.00</div></div>
       <div class="payment-methods" id="payMethods">
         @if ($settings->cash_enabled)
-        <div class="pay-method selected" data-method="cash"><i class="fa-solid fa-money-bill-wave"></i><span>Cash</span></div>
+        <button type="button" class="pay-method selected" data-method="cash"><i class="bx bx-money"></i><span>Cash</span></button>
         @endif
         @if ($settings->card_enabled)
-        <div class="pay-method" data-method="card"><i class="fa-solid fa-credit-card"></i><span>Card</span></div>
+        <button type="button" class="pay-method" data-method="card"><i class="bx bxs-credit-card"></i><span>Card</span></button>
         @endif
         @if ($settings->mobile_enabled)
-        <div class="pay-method" data-method="mobile"><i class="fa-solid fa-mobile-screen"></i><span>Mobile</span></div>
+        <button type="button" class="pay-method" data-method="mobile"><i class="bx bxs-mobile"></i><span>Mobile</span></button>
         @endif
       </div>
       <div id="cashSection">
@@ -93,7 +93,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('paymentModal')">Cancel</button>
-      <button class="btn btn-primary btn-lg" id="processPayBtn"><i class="fa-solid fa-check"></i> Complete Payment</button>
+      <button class="btn btn-primary btn-lg" id="processPayBtn"><i class="bx bx-check"></i> Complete Payment</button>
     </div>
   </div>
 </div>
@@ -102,7 +102,7 @@
   <div class="modal" style="max-width:400px;">
     <div class="modal-header">
       <h3>Apply Discount</h3>
-      <button class="modal-close" onclick="closeModal('discountModal')"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close" onclick="closeModal('discountModal')"><i class="bx bx-x"></i></button>
     </div>
     <div class="modal-body">
       <div class="tabs" style="margin-bottom:16px;">
@@ -116,7 +116,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" id="removeDiscountBtn">Remove</button>
-      <button class="btn btn-primary" id="applyDiscountBtn"><i class="fa-solid fa-check"></i> Apply</button>
+      <button class="btn btn-primary" id="applyDiscountBtn"><i class="bx bx-check"></i> Apply</button>
     </div>
   </div>
 </div>
@@ -125,12 +125,12 @@
   <div class="modal" style="max-width:400px;">
     <div class="modal-header">
       <h3>Receipt</h3>
-      <button class="modal-close" onclick="closeModal('receiptModal')"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close" onclick="closeModal('receiptModal')"><i class="bx bx-x"></i></button>
     </div>
     <div class="modal-body" id="receiptContent"></div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('receiptModal')">Close</button>
-      <button class="btn btn-primary" onclick="showToast('Receipt printed','success');closeModal('receiptModal')"><i class="fa-solid fa-print"></i> Print</button>
+      <button class="btn btn-primary" onclick="showToast('Receipt printed','success');closeModal('receiptModal')"><i class="bx bxs-printer"></i> Print</button>
     </div>
   </div>
 </div>

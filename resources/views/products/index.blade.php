@@ -10,21 +10,21 @@
     <p class="page-subtitle">Manage your product catalog and inventory</p>
   </div>
   @if ($canManage)
-  <button class="btn btn-primary btn-sm" onclick="openProductModal()"><i class="fa-solid fa-plus"></i> Add Product</button>
+  <button class="btn btn-primary btn-sm" onclick="openProductModal()"><i class="bx bx-plus"></i> Add Product</button>
   @endif
 </div>
 
 <div class="grid grid-4" style="margin-bottom:20px;">
-  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--accent-dim);color:var(--accent);width:40px;height:40px;font-size:15px;"><i class="fa-solid fa-box"></i></div><div><div class="stat-label">Total Products</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $totalProducts }}</div></div></div>
-  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--warning-dim);color:var(--warning);width:40px;height:40px;font-size:15px;"><i class="fa-solid fa-triangle-exclamation"></i></div><div><div class="stat-label">Low Stock</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $lowStock }}</div></div></div>
-  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--danger-dim);color:var(--danger);width:40px;height:40px;font-size:15px;"><i class="fa-solid fa-ban"></i></div><div><div class="stat-label">Out of Stock</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $outOfStock }}</div></div></div>
-  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--success-dim);color:var(--success);width:40px;height:40px;font-size:15px;"><i class="fa-solid fa-dollar-sign"></i></div><div><div class="stat-label">Inventory Value</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">@money($inventoryValue)</div></div></div>
+  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--accent-dim);color:var(--accent);width:40px;height:40px;font-size:15px;"><i class="bx bxs-box"></i></div><div><div class="stat-label">Total Products</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $totalProducts }}</div></div></div>
+  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--warning-dim);color:var(--warning);width:40px;height:40px;font-size:15px;"><i class="bx bxs-error"></i></div><div><div class="stat-label">Low Stock</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $lowStock }}</div></div></div>
+  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--danger-dim);color:var(--danger);width:40px;height:40px;font-size:15px;"><i class="bx bx-block"></i></div><div><div class="stat-label">Out of Stock</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $outOfStock }}</div></div></div>
+  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--success-dim);color:var(--success);width:40px;height:40px;font-size:15px;"><i class="bx bxs-dollar-circle"></i></div><div><div class="stat-label">Inventory Value</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">@money($inventoryValue)</div></div></div>
 </div>
 
 <div class="card">
   <form method="GET" style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
     <div class="topbar-search" style="max-width:280px;flex:1;">
-      <i class="fa-solid fa-magnifying-glass"></i>
+      <i class="bx bxs-search"></i>
       <input type="text" name="q" placeholder="Search products..." value="{{ $search }}">
     </div>
     <select class="input-field" style="width:auto;height:38px;" name="category" onchange="this.form.submit()">
@@ -59,10 +59,10 @@
           @if ($canManage)
           <td>
             <div style="display:flex;gap:4px;">
-              <button class="btn btn-secondary btn-sm btn-icon" title="Edit" onclick='openProductModal(@json($p))'><i class="fa-solid fa-pen" style="font-size:11px;"></i></button>
+              <button class="btn btn-secondary btn-sm btn-icon" title="Edit" onclick='openProductModal(@json($p))'><i class="bx bxs-pencil" style="font-size:11px;"></i></button>
               <form method="POST" action="{{ route('products.destroy', $p) }}" data-confirm="Delete {{ $p->name }}? This cannot be undone." data-confirm-title="Delete Product" data-confirm-label="Delete">
                 @csrf @method('DELETE')
-                <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Delete"><i class="fa-solid fa-trash" style="font-size:11px;"></i></button>
+                <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Delete"><i class="bx bxs-trash" style="font-size:11px;"></i></button>
               </form>
             </div>
           </td>
@@ -84,7 +84,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3 id="productModalTitle">Add Product</h3>
-      <button class="modal-close" onclick="closeModal('productModal')"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close" onclick="closeModal('productModal')"><i class="bx bx-x"></i></button>
     </div>
     <form id="productForm" method="POST" action="{{ route('products.store') }}">
       @csrf
@@ -108,7 +108,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeModal('productModal')">Cancel</button>
-        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Save Product</button>
+        <button type="submit" class="btn btn-primary"><i class="bx bx-check"></i> Save Product</button>
       </div>
     </form>
   </div>

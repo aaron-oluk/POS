@@ -108,7 +108,7 @@ function toggleTheme() {
     localStorage.setItem('nexus-theme', next);
     const themeToggle = document.getElementById('themeToggle');
     if (themeToggle) {
-        themeToggle.innerHTML = isDark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+        themeToggle.innerHTML = isDark ? '<i class="bx bxs-sun"></i>' : '<i class="bx bxs-moon"></i>';
     }
     document.dispatchEvent(new CustomEvent('theme-changed', { detail: { theme: next } }));
 }
@@ -118,13 +118,13 @@ window.toggleTheme = toggleTheme;
 
 // ===== TOAST =====
 window.showToast = function (msg, type = 'info') {
-    const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+    const icons = { success: 'bxs-check-circle', error: 'bxs-error-circle', warning: 'bxs-error', info: 'bxs-info-circle' };
     const colors = { success: 'var(--success)', error: 'var(--danger)', warning: 'var(--warning)', info: 'var(--info)' };
     const container = document.getElementById('toastContainer');
     if (!container) return;
     const t = document.createElement('div');
     t.className = 'toast';
-    t.innerHTML = `<i class="fa-solid ${icons[type]}" style="color:${colors[type]};font-size:16px;"></i><span></span>`;
+    t.innerHTML = `<i class="bx ${icons[type]}" style="color:${colors[type]};font-size:16px;"></i><span></span>`;
     t.querySelector('span').textContent = msg;
     container.appendChild(t);
     setTimeout(() => {

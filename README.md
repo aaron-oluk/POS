@@ -6,7 +6,7 @@ A full-stack point-of-sale system for a coffee shop, built with Laravel 12 and a
 
 - **Backend**: Laravel 12, SQLite
 - **Auth**: session-based (`Auth` facade), no public registration — staff accounts are created by an Admin/Manager from the Staff page
-- **Frontend**: Blade views sharing one layout, vanilla CSS (`resources/css/app.css`) and JS (`resources/js/app.js` + `resources/js/pages/pos.js`), bundled with Vite. Chart.js, Font Awesome, and Google Fonts are loaded from CDN.
+- **Frontend**: Blade views sharing one layout, vanilla CSS (`resources/css/app.css`, sized in `rem`/`em` rather than fixed `px` — only border-widths, box-shadows, and one decorative background dot stay in `px`) and JS (`resources/js/app.js` + `resources/js/pages/pos.js`), bundled with Vite. Chart.js, Boxicons, and Google Fonts are loaded from CDN.
 - **Roles**: `admin`, `manager`, `cashier`, `barista`. Only `admin`/`manager` can manage Products, Staff, Settings, and process refunds.
 
 ## Getting started
@@ -53,6 +53,8 @@ All seeded users share the password `password`.
 The store's currency is auto-detected on first run from the host machine's real system timezone (`App\Support\CurrencyDetector`, via `/etc/localtime`/`/etc/timezone` — not Laravel's `config('app.timezone')`, which is fixed to UTC) and resolved to one of 36 curated world currencies with native symbols and approximate USD exchange rates. Override detection with the `SYSTEM_TIMEZONE` env var if the host isn't representative (e.g. in a container), or change it any time on Settings > General.
 
 Prices and totals are stored **natively in the active currency**, not live-converted at display time: `App\Support\CurrencyConverter` rescales every `products.price`/`cost`, `orders.*`, and `order_items.*` value whenever the currency changes (seed data is converted once at install too), so editing a product always shows/saves a plain native-currency number and historical order totals stay internally consistent. The `@money($amount)` Blade directive and `window.formatMoney()` JS helper handle display formatting (decimal precision + symbol placement) everywhere amounts are shown, including the POS terminal's quick-cash buttons, which round to sensible note-sized denominations in whatever currency is active rather than fixed $5/$10/$20.
+
+The store's **timezone** is auto-detected the same way (`App\Support\CurrencyDetector::detectTimezone()`) and the Settings > General dropdown lists every IANA timezone PHP knows about, grouped by region, rather than a fixed shortlist.
 
 ## Data model
 

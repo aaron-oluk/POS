@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('currency', 8)->default('USD');
             $table->string('currency_symbol', 8)->default('$');
             $table->decimal('exchange_rate', 12, 4)->default(1);
-            $table->string('timezone')->default('America/New_York');
+            $table->string('timezone')->default('UTC');
             // Appearance
             $table->boolean('dark_mode')->default(true);
             $table->boolean('compact_mode')->default(false);

@@ -19,10 +19,10 @@
 </div>
 
 <div class="grid grid-4" style="margin-bottom:24px;">
-  <div class="card stat-card"><div class="stat-icon" style="background:var(--accent-dim);color:var(--accent);"><i class="fa-solid fa-dollar-sign"></i></div><div><div class="stat-label">Total Revenue</div><div class="stat-value">@money($totalRevenue)</div></div></div>
-  <div class="card stat-card"><div class="stat-icon" style="background:var(--success-dim);color:var(--success);"><i class="fa-solid fa-bag-shopping"></i></div><div><div class="stat-label">Total Orders</div><div class="stat-value">{{ $totalOrders }}</div></div></div>
-  <div class="card stat-card"><div class="stat-icon" style="background:var(--info-dim);color:var(--info);"><i class="fa-solid fa-receipt"></i></div><div><div class="stat-label">Avg. Order</div><div class="stat-value">@money($avgOrder)</div></div></div>
-  <div class="card stat-card"><div class="stat-icon" style="background:var(--warning-dim);color:var(--warning);"><i class="fa-solid fa-hand-holding-dollar"></i></div><div><div class="stat-label">Total Tips</div><div class="stat-value">@money($totalTips)</div></div></div>
+  <div class="card stat-card"><div class="stat-icon" style="background:var(--accent-dim);color:var(--accent);"><i class="bx bxs-dollar-circle"></i></div><div><div class="stat-label">Total Revenue</div><div class="stat-value">@money($totalRevenue)</div></div></div>
+  <div class="card stat-card"><div class="stat-icon" style="background:var(--success-dim);color:var(--success);"><i class="bx bxs-shopping-bag"></i></div><div><div class="stat-label">Total Orders</div><div class="stat-value">{{ $totalOrders }}</div></div></div>
+  <div class="card stat-card"><div class="stat-icon" style="background:var(--info-dim);color:var(--info);"><i class="bx bxs-receipt"></i></div><div><div class="stat-label">Avg. Order</div><div class="stat-value">@money($avgOrder)</div></div></div>
+  <div class="card stat-card"><div class="stat-icon" style="background:var(--warning-dim);color:var(--warning);"><i class="bx bxs-donate-heart"></i></div><div><div class="stat-label">Total Tips</div><div class="stat-value">@money($totalTips)</div></div></div>
 </div>
 
 <div class="grid grid-2" style="margin-bottom:24px;">
@@ -62,7 +62,7 @@
         <span class="badge {{ $p->stock <= 0 ? 'badge-danger' : 'badge-warning' }}">{{ $p->stock <= 0 ? 'Out' : $p->stock.' left' }}</span>
       </div>
       @empty
-      <div style="text-align:center;padding:24px;color:var(--fg-muted);"><i class="fa-solid fa-check-circle" style="font-size:32px;color:var(--success);display:block;margin-bottom:8px;"></i>All items are well stocked</div>
+      <div style="text-align:center;padding:24px;color:var(--fg-muted);"><i class="bx bxs-check-circle" style="font-size:32px;color:var(--success);display:block;margin-bottom:8px;"></i>All items are well stocked</div>
       @endforelse
     </div>
   </div>
