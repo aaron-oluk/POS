@@ -35,11 +35,11 @@
           <td style="color:var(--fg-muted);font-size:12px;">{{ $o->created_at->format('M j, g:i A') }}</td>
           <td>
             <div style="display:flex;gap:4px;">
-              <button class="btn btn-secondary btn-sm btn-icon" onclick="showOrderDetail({{ $o->id }})" title="View"><i class="bx bxs-show" style="font-size:11px;"></i></button>
+              <button class="btn btn-secondary btn-sm btn-icon" onclick="showOrderDetail({{ $o->id }})" aria-label="View" data-tooltip="View"><i class="bx bxs-show" style="font-size:11px;"></i></button>
               @if ($o->status === 'completed')
               <form method="POST" action="{{ route('orders.refund', $o) }}" data-confirm="Refund {{ $o->order_number }}? This will mark it as refunded." data-confirm-title="Refund Order" data-confirm-label="Refund">
                 @csrf @method('PATCH')
-                <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Refund"><i class="bx bx-rotate-left" style="font-size:11px;"></i></button>
+                <button type="submit" class="btn btn-danger btn-sm btn-icon" aria-label="Refund" data-tooltip="Refund"><i class="bx bx-rotate-left" style="font-size:11px;"></i></button>
               </form>
               @endif
             </div>
@@ -60,7 +60,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3>Order Details</h3>
-      <button class="modal-close" onclick="closeModal('orderDetailModal')"><i class="bx bx-x"></i></button>
+      <button class="modal-close" onclick="closeModal('orderDetailModal')" aria-label="Close" data-tooltip="Close"><i class="bx bx-x"></i></button>
     </div>
     <div class="modal-body" id="orderDetailContent"></div>
     <div class="modal-footer">

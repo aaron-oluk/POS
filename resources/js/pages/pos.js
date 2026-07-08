@@ -1,11 +1,76 @@
 const { products, categories, checkoutUrl } = window.posData;
 
+const CART_STORAGE_KEY = 'nexus-pos-cart-v1';
+
 let cart = [];
 let discountType = 'percent';
 let discountValue = 0;
 let selectedPayMethod = 'cash';
 let currentTip = 0;
 let currentPosCategory = 'All';
+
+// ===== CART PERSISTENCE =====
+// The cart is plain in-memory JS state, which would normally be wiped out
+// the moment the cashier navigates to another page (this is a regular
+// server-rendered app, not an SPA). Mirror it to localStorage so a held
+// selection survives navigating away and back, and only actually disappears
+// when the cashier clears it (or completes checkout).
+function saveCartState() {
+    try {
+        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({
+            items: cart.map((c) => ({ productId: c.product.id, qty: c.qty })),
+            discountType,
+            discountValue,
+            customerId: document.getElementById('posCustomer')?.value || '',
+        }));
+    } catch (e) {
+        // localStorage unavailable (e.g. private browsing quota) — cart just won't persist.
+    }
+}
+
+function clearCartState() {
+    try {
+        localStorage.removeItem(CART_STORAGE_KEY);
+    } catch (e) {
+        // ignore
+    }
+}
+
+function restoreCartState() {
+    let saved;
+    try {
+        saved = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || 'null');
+    } catch (e) {
+        saved = null;
+    }
+    if (!saved) return;
+
+    const restoredItems = [];
+    (saved.items || []).forEach((item) => {
+        const product = products.find((p) => p.id === item.productId);
+        if (!product || product.stock <= 0) return;
+        restoredItems.push({ product, qty: Math.min(item.qty, product.stock) });
+    });
+    cart = restoredItems;
+
+    if (saved.discountType === 'percent' || saved.discountType === 'fixed') {
+        discountType = saved.discountType;
+    }
+    discountValue = Number(saved.discountValue) || 0;
+
+    const discountTab = document.querySelector(`#discountModal .tab[data-type="${discountType}"]`);
+    if (discountTab) {
+        document.querySelectorAll('#discountModal .tab').forEach((t) => t.classList.remove('active'));
+        discountTab.classList.add('active');
+        document.getElementById('discountLabel').textContent = discountType === 'percent' ? 'Discount Percentage' : `Discount Amount (${window.currency?.symbol || '$'})`;
+    }
+    document.getElementById('discountValue').value = discountValue || '';
+
+    const customerSelect = document.getElementById('posCustomer');
+    if (customerSelect && saved.customerId && [...customerSelect.options].some((o) => o.value === saved.customerId)) {
+        customerSelect.value = saved.customerId;
+    }
+}
 
 function renderPosCategories() {
     document.getElementById('posCategories').innerHTML = categories.map((c) =>
@@ -108,12 +173,12 @@ function renderCart() {
                     <div class="pos-cart-item-price">${window.formatMoney(c.product.price)} each</div>
                 </div>
                 <div class="pos-cart-qty">
-                    <button data-id="${c.product.id}" data-delta="-1"><i class="bx bx-minus" style="font-size:10px;"></i></button>
+                    <button data-id="${c.product.id}" data-delta="-1" aria-label="Decrease quantity" data-tooltip="Decrease quantity"><i class="bx bx-minus" style="font-size:10px;"></i></button>
                     <span>${c.qty}</span>
-                    <button data-id="${c.product.id}" data-delta="1"><i class="bx bx-plus" style="font-size:10px;"></i></button>
+                    <button data-id="${c.product.id}" data-delta="1" aria-label="Increase quantity" data-tooltip="Increase quantity"><i class="bx bx-plus" style="font-size:10px;"></i></button>
                 </div>
                 <div class="pos-cart-item-total">${window.formatMoney(c.product.price * c.qty)}</div>
-                <button class="pos-cart-item-remove" data-remove="${c.product.id}"><i class="bx bx-x"></i></button>
+                <button class="pos-cart-item-remove" data-remove="${c.product.id}" aria-label="Remove from cart" data-tooltip="Remove from cart"><i class="bx bx-x"></i></button>
             </div>
         `).join('');
         container.querySelectorAll('[data-delta]').forEach((btn) => {

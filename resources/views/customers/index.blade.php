@@ -52,7 +52,7 @@
           <td><span class="badge" style="background:{{ $tierColors[$c->tier] }}22;color:{{ $tierColors[$c->tier] }};"><i class="bx bxs-crown" style="font-size:9px;"></i> {{ ucfirst($c->tier) }}</span></td>
           <td>
             <div style="display:flex;gap:4px;">
-              <button class="btn btn-secondary btn-sm btn-icon" title="Edit" onclick='openCustomerModal(@json($c))'><i class="bx bxs-pencil" style="font-size:11px;"></i></button>
+              <button class="btn btn-secondary btn-sm btn-icon" aria-label="Edit" data-tooltip="Edit" onclick='openCustomerModal(@json($c))'><i class="bx bxs-pencil" style="font-size:11px;"></i></button>
             </div>
           </td>
         </tr>
@@ -71,7 +71,7 @@
   <div class="modal" style="max-width:460px;">
     <div class="modal-header">
       <h3 id="customerModalTitle">Add Customer</h3>
-      <button class="modal-close" onclick="closeModal('customerModal')"><i class="bx bx-x"></i></button>
+      <button class="modal-close" onclick="closeModal('customerModal')" aria-label="Close" data-tooltip="Close"><i class="bx bx-x"></i></button>
     </div>
     <form id="customerForm" method="POST" action="{{ route('customers.store') }}">
       @csrf

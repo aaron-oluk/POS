@@ -59,10 +59,10 @@
           @if ($canManage)
           <td>
             <div style="display:flex;gap:4px;">
-              <button class="btn btn-secondary btn-sm btn-icon" title="Edit" onclick='openProductModal(@json($p))'><i class="bx bxs-pencil" style="font-size:11px;"></i></button>
+              <button class="btn btn-secondary btn-sm btn-icon" aria-label="Edit" data-tooltip="Edit" onclick='openProductModal(@json($p))'><i class="bx bxs-pencil" style="font-size:11px;"></i></button>
               <form method="POST" action="{{ route('products.destroy', $p) }}" data-confirm="Delete {{ $p->name }}? This cannot be undone." data-confirm-title="Delete Product" data-confirm-label="Delete">
                 @csrf @method('DELETE')
-                <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Delete"><i class="bx bxs-trash" style="font-size:11px;"></i></button>
+                <button type="submit" class="btn btn-danger btn-sm btn-icon" aria-label="Delete" data-tooltip="Delete"><i class="bx bxs-trash" style="font-size:11px;"></i></button>
               </form>
             </div>
           </td>
@@ -84,7 +84,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3 id="productModalTitle">Add Product</h3>
-      <button class="modal-close" onclick="closeModal('productModal')"><i class="bx bx-x"></i></button>
+      <button class="modal-close" onclick="closeModal('productModal')" aria-label="Close" data-tooltip="Close"><i class="bx bx-x"></i></button>
     </div>
     <form id="productForm" method="POST" action="{{ route('products.store') }}">
       @csrf

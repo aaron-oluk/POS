@@ -8,14 +8,17 @@
     <h1 class="page-title">Reports</h1>
     <p class="page-subtitle">Detailed analytics and business insights</p>
   </div>
-  <form method="GET">
-    <select class="input-field" style="width:auto;height:38px;" name="period" onchange="this.form.submit()">
-      <option value="today" {{ $period === 'today' ? 'selected' : '' }}>Today</option>
-      <option value="week" {{ $period === 'week' ? 'selected' : '' }}>This Week</option>
-      <option value="month" {{ $period === 'month' ? 'selected' : '' }}>This Month</option>
-      <option value="year" {{ $period === 'year' ? 'selected' : '' }}>This Year</option>
-    </select>
-  </form>
+  <div style="display:flex;gap:8px;">
+    <form method="GET">
+      <select class="input-field" style="width:auto;height:38px;" name="period" onchange="this.form.submit()">
+        <option value="today" {{ $period === 'today' ? 'selected' : '' }}>Today</option>
+        <option value="week" {{ $period === 'week' ? 'selected' : '' }}>This Week</option>
+        <option value="month" {{ $period === 'month' ? 'selected' : '' }}>This Month</option>
+        <option value="year" {{ $period === 'year' ? 'selected' : '' }}>This Year</option>
+      </select>
+    </form>
+    <a href="{{ route('reports.download', ['period' => $period]) }}" class="btn btn-secondary btn-sm" data-tooltip="Download a PDF with full period analysis"><i class="bx bxs-download"></i> Download</a>
+  </div>
 </div>
 
 <div class="grid grid-4" style="margin-bottom:24px;">

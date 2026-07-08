@@ -72,18 +72,18 @@
 
   <div class="main">
     <header class="topbar">
-      <button class="topbar-toggle" id="sidebarToggle" aria-label="Toggle sidebar"><i class="bx bx-menu"></i></button>
+      <button class="topbar-toggle" id="sidebarToggle" aria-label="Toggle sidebar" data-tooltip="Toggle sidebar"><i class="bx bx-menu"></i></button>
       <form class="topbar-search" action="{{ route('search') }}" method="GET">
         <i class="bx bxs-search"></i>
         <input type="text" name="q" placeholder="Search products, orders, customers..." aria-label="Global search" value="{{ request('q') }}">
       </form>
       <div class="topbar-actions">
         <div class="topbar-time" id="topbarTime"></div>
-        <button class="topbar-btn" id="themeToggle" aria-label="Toggle theme"><i class="bx {{ \App\Models\Setting::current()->dark_mode ? 'bxs-moon' : 'bxs-sun' }}"></i></button>
-        <button class="topbar-btn" aria-label="Notifications"><i class="bx bxs-bell"></i><span class="dot"></span></button>
+        <button class="topbar-btn" id="themeToggle" aria-label="Toggle theme" data-tooltip="Toggle theme"><i class="bx {{ \App\Models\Setting::current()->dark_mode ? 'bxs-moon' : 'bxs-sun' }}"></i></button>
+        <button class="topbar-btn" aria-label="Notifications" data-tooltip="Notifications"><i class="bx bxs-bell"></i><span class="dot"></span></button>
         <form method="POST" action="{{ route('logout') }}">
           @csrf
-          <button type="submit" class="topbar-btn" aria-label="Log out" title="Log out"><i class="bx bxs-log-out"></i></button>
+          <button type="submit" class="topbar-btn" aria-label="Log out" data-tooltip="Log out"><i class="bx bxs-log-out"></i></button>
         </form>
       </div>
     </header>
@@ -101,7 +101,7 @@
   <div class="modal" style="max-width:400px;">
     <div class="modal-header">
       <h3 id="confirmModalTitle">Please Confirm</h3>
-      <button type="button" class="modal-close" id="confirmModalClose"><i class="bx bx-x"></i></button>
+      <button type="button" class="modal-close" id="confirmModalClose" aria-label="Close" data-tooltip="Close"><i class="bx bx-x"></i></button>
     </div>
     <div class="modal-body">
       <p id="confirmModalMessage" style="font-size:13px;color:var(--fg);line-height:1.5;"></p>

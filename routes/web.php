@@ -50,6 +50,7 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/download', [ReportController::class, 'download'])->name('reports.download');
 
     Route::get('/search', [SearchController::class, 'index'])->name('search');
 });

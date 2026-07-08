@@ -18,8 +18,8 @@
     <div class="pos-cart-header">
       <h3>Current Order</h3>
       <div style="display:flex;gap:6px;">
-        <button class="btn-icon btn-secondary" id="holdOrderBtn" title="Hold Order"><i class="bx bx-pause"></i></button>
-        <button class="btn-icon btn-danger" id="clearCartBtn" title="Clear Cart"><i class="bx bxs-trash"></i></button>
+        <button class="btn-icon btn-secondary" id="holdOrderBtn" aria-label="Hold Order" data-tooltip="Hold Order"><i class="bx bx-pause"></i></button>
+        <button class="btn-icon btn-danger" id="clearCartBtn" aria-label="Clear Cart" data-tooltip="Clear Cart"><i class="bx bxs-trash"></i></button>
       </div>
     </div>
     <div class="pos-cart-items" id="posCartItems">
@@ -53,7 +53,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3>Process Payment</h3>
-      <button class="modal-close" onclick="closeModal('paymentModal')"><i class="bx bx-x"></i></button>
+      <button class="modal-close" onclick="closeModal('paymentModal')" aria-label="Close" data-tooltip="Close"><i class="bx bx-x"></i></button>
     </div>
     <div class="modal-body">
       <div class="pay-amount-display"><div class="label">Amount Due</div><div class="amount" id="payAmount">$0.00</div></div>
@@ -102,7 +102,7 @@
   <div class="modal" style="max-width:400px;">
     <div class="modal-header">
       <h3>Apply Discount</h3>
-      <button class="modal-close" onclick="closeModal('discountModal')"><i class="bx bx-x"></i></button>
+      <button class="modal-close" onclick="closeModal('discountModal')" aria-label="Close" data-tooltip="Close"><i class="bx bx-x"></i></button>
     </div>
     <div class="modal-body">
       <div class="tabs" style="margin-bottom:16px;">
@@ -125,7 +125,7 @@
   <div class="modal" style="max-width:400px;">
     <div class="modal-header">
       <h3>Receipt</h3>
-      <button class="modal-close" onclick="closeModal('receiptModal')"><i class="bx bx-x"></i></button>
+      <button class="modal-close" onclick="closeModal('receiptModal')" aria-label="Close" data-tooltip="Close"><i class="bx bx-x"></i></button>
     </div>
     <div class="modal-body" id="receiptContent"></div>
     <div class="modal-footer">

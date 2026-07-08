@@ -45,7 +45,7 @@ All seeded users share the password `password`.
 - **Products** (`/products`) — search/category/stock filters, add/edit/delete (Admin/Manager only), low-stock and inventory-value stats.
 - **Customers** (`/customers`) — search/tier filters, add/edit. Tier (bronze/silver/gold) and lifetime spend are computed from completed orders, not stored.
 - **Staff** (`/staff`, Admin/Manager only) — table of employees with role/status/sales/orders, add/edit via modal.
-- **Reports** (`/reports`) — today/week/month/year period selector, hourly sales, payment-method mix, staff leaderboard, low-stock alerts.
+- **Reports** (`/reports`) — today/week/month/year period selector, hourly sales, payment-method mix, staff leaderboard, low-stock alerts. **Download** exports a formatted PDF (`barryvdh/laravel-dompdf`) for the selected period with the same figures plus a plain-English analysis section (busiest hour, top seller, leading category, top staff member, restock warnings) — see `ReportController::download()`/`buildInsights()` and `resources/views/reports/pdf.blade.php`.
 - **Settings** (`/settings`, Admin/Manager only) — General/Receipt/Payment/Tax tabs, including per-category tax rate/exemption overrides that feed directly into POS checkout tax calculations.
 
 ### Currency
@@ -55,6 +55,10 @@ The store's currency is auto-detected on first run from the host machine's real 
 Prices and totals are stored **natively in the active currency**, not live-converted at display time: `App\Support\CurrencyConverter` rescales every `products.price`/`cost`, `orders.*`, and `order_items.*` value whenever the currency changes (seed data is converted once at install too), so editing a product always shows/saves a plain native-currency number and historical order totals stay internally consistent. The `@money($amount)` Blade directive and `window.formatMoney()` JS helper handle display formatting (decimal precision + symbol placement) everywhere amounts are shown, including the POS terminal's quick-cash buttons, which round to sensible note-sized denominations in whatever currency is active rather than fixed $5/$10/$20.
 
 The store's **timezone** is auto-detected the same way (`App\Support\CurrencyDetector::detectTimezone()`) and the Settings > General dropdown lists every IANA timezone PHP knows about, grouped by region, rather than a fixed shortlist.
+
+### Tooltips
+
+Icon-only controls (cart quantity +/-, remove item, hold/clear cart, table row actions, modal close buttons, topbar icons) carry a `data-tooltip="Label"` attribute plus a matching `aria-label`. A CSS-only tooltip (`[data-tooltip]::after` in `app.css`) shows the label just *below* the control on hover/focus — anchored below rather than above because most of these controls sit at the top edge of a scrolling container (topbar, cart header, modal header), where an above-anchored tooltip gets clipped by that ancestor's `overflow`.
 
 ## Data model
 

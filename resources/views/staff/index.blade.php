@@ -31,7 +31,7 @@
           <td style="font-family:'Figtree';font-weight:600;">@money($s->orders_sum_total ?? 0)</td>
           <td style="font-family:'Figtree';font-weight:600;">{{ $s->orders_count }}</td>
           <td>
-            <button class="btn btn-secondary btn-sm btn-icon" title="Edit" onclick='openStaffModal(@json($s))'><i class="bx bxs-pencil" style="font-size:11px;"></i></button>
+            <button class="btn btn-secondary btn-sm btn-icon" aria-label="Edit" data-tooltip="Edit" onclick='openStaffModal(@json($s))'><i class="bx bxs-pencil" style="font-size:11px;"></i></button>
           </td>
         </tr>
         @empty
@@ -48,7 +48,7 @@
   <div class="modal">
     <div class="modal-header">
       <h3 id="staffModalTitle">Add Staff Member</h3>
-      <button class="modal-close" onclick="closeModal('staffModal')"><i class="bx bx-x"></i></button>
+      <button class="modal-close" onclick="closeModal('staffModal')" aria-label="Close" data-tooltip="Close"><i class="bx bx-x"></i></button>
     </div>
     <form id="staffForm" method="POST" action="{{ route('staff.store') }}">
       @csrf
