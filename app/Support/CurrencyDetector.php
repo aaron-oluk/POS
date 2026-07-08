@@ -43,7 +43,32 @@ class CurrencyDetector
     ];
 
     /**
-     * Detect ['code' => ..., 'symbol' => ...] from the host machine's real-world
+     * Approximate units-per-1-USD used to convert the app's USD-denominated
+     * seed prices into whatever currency is active. These are static
+     * snapshots, not a live feed — good enough for a self-hosted POS demo,
+     * but a real deployment should refresh them from a live rates API.
+     */
+    protected const EXCHANGE_RATES = [
+        'USD' => 1, 'EUR' => 0.92, 'GBP' => 0.79, 'JPY' => 149,
+        'CAD' => 1.36, 'AUD' => 1.51, 'NZD' => 1.64, 'CHF' => 0.88,
+        'CNY' => 7.24, 'HKD' => 7.82, 'SGD' => 1.34, 'INR' => 83.3,
+        'PKR' => 278, 'BDT' => 110, 'PHP' => 56.5, 'THB' => 35.8,
+        'VND' => 24500, 'IDR' => 15600, 'KRW' => 1330,
+        'KES' => 129, 'UGX' => 3700, 'TZS' => 2500, 'NGN' => 1550,
+        'GHS' => 15.2, 'ZAR' => 18.7, 'EGP' => 48.5,
+        'SAR' => 3.75, 'AED' => 3.67,
+        'BRL' => 5.05, 'MXN' => 17.0,
+        'TRY' => 32.1, 'RUB' => 92.5, 'PLN' => 4.02,
+        'SEK' => 10.5, 'NOK' => 10.6, 'DKK' => 6.87,
+    ];
+
+    /**
+     * Currencies not commonly displayed with sub-unit (cent) precision.
+     */
+    protected const ZERO_DECIMAL = ['JPY', 'KRW', 'VND', 'IDR', 'UGX', 'TZS'];
+
+    /**
+     * Detect ['code', 'symbol', 'rate'] from the host machine's real-world
      * location (system timezone, falling back to the OS locale) rather than
      * Laravel's app timezone, which is usually forced to UTC.
      */
@@ -55,12 +80,12 @@ class CurrencyDetector
             return $currency;
         }
 
-        return ['code' => 'USD', 'symbol' => '$'];
+        return ['code' => 'USD', 'symbol' => '$', 'rate' => 1.0];
     }
 
     /**
      * Curated list of world currencies for the Settings dropdown:
-     * [code => ['name' => ..., 'symbol' => ...]].
+     * [code => ['name' => ..., 'symbol' => ..., 'rate' => ...]].
      */
     public static function supportedCurrencies(): array
     {
@@ -70,6 +95,7 @@ class CurrencyDetector
             $list[$code] = [
                 'name' => static::CURRENCY_NAMES[$code] ?? $code,
                 'symbol' => static::symbolForLocale($locale),
+                'rate' => static::rateFor($code),
             ];
         }
 
@@ -87,6 +113,16 @@ class CurrencyDetector
         return $locale ? static::symbolForLocale($locale) : $code;
     }
 
+    public static function rateFor(string $code): float
+    {
+        return (float) (static::EXCHANGE_RATES[$code] ?? 1.0);
+    }
+
+    public static function decimalsFor(string $code): int
+    {
+        return in_array($code, static::ZERO_DECIMAL, true) ? 0 : 2;
+    }
+
     protected static function currencyForCountry(string $country): ?array
     {
         $fmt = new NumberFormatter('en_'.$country, NumberFormatter::CURRENCY);
@@ -96,7 +132,7 @@ class CurrencyDetector
             return null;
         }
 
-        return ['code' => $code, 'symbol' => static::symbolFor($code)];
+        return ['code' => $code, 'symbol' => static::symbolFor($code), 'rate' => static::rateFor($code)];
     }
 
     protected static function symbolForLocale(string $locale): string

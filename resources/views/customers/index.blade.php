@@ -18,7 +18,7 @@
 <div class="grid grid-3" style="margin-bottom:20px;">
   <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--accent-dim);color:var(--accent);width:40px;height:40px;font-size:15px;"><i class="fa-solid fa-users"></i></div><div><div class="stat-label">Total Customers</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $totalCustomers }}</div></div></div>
   <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--warning-dim);color:var(--warning);width:40px;height:40px;font-size:15px;"><i class="fa-solid fa-crown"></i></div><div><div class="stat-label">Gold Members</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $goldCount }}</div></div></div>
-  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--success-dim);color:var(--success);width:40px;height:40px;font-size:15px;"><i class="fa-solid fa-chart-simple"></i></div><div><div class="stat-label">Avg. Spend</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">${{ number_format($avgSpend, 0) }}</div></div></div>
+  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--success-dim);color:var(--success);width:40px;height:40px;font-size:15px;"><i class="fa-solid fa-chart-simple"></i></div><div><div class="stat-label">Avg. Spend</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">@money($avgSpend)</div></div></div>
 </div>
 
 <div class="card">
@@ -48,7 +48,7 @@
           <td style="color:var(--fg-muted);">{{ $c->email }}</td>
           <td style="color:var(--fg-muted);">{{ $c->phone }}</td>
           <td style="font-family:'Figtree';font-weight:600;">{{ $c->orders_count }}</td>
-          <td style="font-family:'Figtree';font-weight:600;">${{ number_format($c->total_spent, 2) }}</td>
+          <td style="font-family:'Figtree';font-weight:600;">@money($c->total_spent)</td>
           <td><span class="badge" style="background:{{ $tierColors[$c->tier] }}22;color:{{ $tierColors[$c->tier] }};"><i class="fa-solid fa-crown" style="font-size:9px;"></i> {{ ucfirst($c->tier) }}</span></td>
           <td>
             <div style="display:flex;gap:4px;">

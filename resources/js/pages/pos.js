@@ -32,7 +32,7 @@ function renderPosGrid() {
         <div class="pos-item" data-id="${p.id}" title="${p.desc ?? ''}">
             <div class="pos-item-img">${p.icon}</div>
             <div class="pos-item-name">${p.name}</div>
-            <div class="pos-item-price">$${p.price.toFixed(2)}</div>
+            <div class="pos-item-price">${window.formatMoney(p.price)}</div>
             <div class="pos-item-stock">${p.stock} in stock</div>
         </div>
     `).join('');
@@ -105,14 +105,14 @@ function renderCart() {
             <div class="pos-cart-item">
                 <div class="pos-cart-item-info">
                     <div class="pos-cart-item-name">${c.product.icon} ${c.product.name}</div>
-                    <div class="pos-cart-item-price">$${c.product.price.toFixed(2)} each</div>
+                    <div class="pos-cart-item-price">${window.formatMoney(c.product.price)} each</div>
                 </div>
                 <div class="pos-cart-qty">
                     <button data-id="${c.product.id}" data-delta="-1"><i class="fa-solid fa-minus" style="font-size:10px;"></i></button>
                     <span>${c.qty}</span>
                     <button data-id="${c.product.id}" data-delta="1"><i class="fa-solid fa-plus" style="font-size:10px;"></i></button>
                 </div>
-                <div class="pos-cart-item-total">$${(c.product.price * c.qty).toFixed(2)}</div>
+                <div class="pos-cart-item-total">${window.formatMoney(c.product.price * c.qty)}</div>
                 <button class="pos-cart-item-remove" data-remove="${c.product.id}"><i class="fa-solid fa-xmark"></i></button>
             </div>
         `).join('');
@@ -124,10 +124,10 @@ function renderCart() {
         });
     }
     const t = getCartTotals();
-    document.getElementById('cartSubtotal').textContent = '$' + t.subtotal.toFixed(2);
-    document.getElementById('cartTax').textContent = '$' + t.tax.toFixed(2);
-    document.getElementById('cartDiscount').textContent = '-$' + t.disc.toFixed(2);
-    document.getElementById('cartTotal').textContent = '$' + t.total.toFixed(2);
+    document.getElementById('cartSubtotal').textContent = window.formatMoney(t.subtotal);
+    document.getElementById('cartTax').textContent = window.formatMoney(t.tax);
+    document.getElementById('cartDiscount').textContent = '-' + window.formatMoney(t.disc);
+    document.getElementById('cartTotal').textContent = window.formatMoney(t.total);
     renderPosGrid();
 }
 
@@ -146,7 +146,7 @@ document.querySelectorAll('#discountModal .tab').forEach((tab) => {
         discountType = tab.dataset.type;
         document.querySelectorAll('#discountModal .tab').forEach((t) => t.classList.remove('active'));
         tab.classList.add('active');
-        document.getElementById('discountLabel').textContent = discountType === 'percent' ? 'Discount Percentage' : 'Discount Amount ($)';
+        document.getElementById('discountLabel').textContent = discountType === 'percent' ? 'Discount Percentage' : `Discount Amount (${window.currency?.symbol || '$'})`;
     });
 });
 document.getElementById('applyDiscountBtn').addEventListener('click', () => {
@@ -165,14 +165,49 @@ document.getElementById('removeDiscountBtn').addEventListener('click', () => {
 });
 
 // ===== Payment modal =====
+
+// Rounds up to a "nice" 1/2/5-style step at the value's own order of magnitude,
+// so quick-cash suggestions look like real bills/notes in whatever currency is active.
+function niceRoundUp(value) {
+    if (!isFinite(value) || value <= 0) return 0;
+    const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
+    const normalized = value / magnitude;
+    let nice;
+    if (normalized <= 1) nice = 1;
+    else if (normalized <= 2) nice = 2;
+    else if (normalized <= 5) nice = 5;
+    else nice = 10;
+    return nice * magnitude;
+}
+
+function renderQuickCashButtons(total) {
+    const container = document.getElementById('quickCashButtons');
+    if (!container) return;
+    const base = total > 0 ? total : 1;
+    const amounts = [...new Set([1, 1.5, 2, 3, 5].map((m) => niceRoundUp(base * m)))];
+
+    container.innerHTML = amounts.map((amt) =>
+        `<button type="button" class="btn btn-secondary btn-sm quick-cash" data-amt="${amt}">${window.formatMoney(amt)}</button>`
+    ).join('') + `<button type="button" class="btn btn-secondary btn-sm quick-cash" data-amt="exact">Exact</button>`;
+
+    container.querySelectorAll('.quick-cash').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const amt = btn.dataset.amt;
+            document.getElementById('cashReceived').value = amt === 'exact' ? getCartTotals().total.toFixed(2) : amt;
+            calcChange();
+        });
+    });
+}
+
 document.getElementById('showPaymentBtn').addEventListener('click', () => {
     if (cart.length === 0) { showToast('Cart is empty', 'warning'); return; }
     const t = getCartTotals();
-    document.getElementById('payAmount').textContent = '$' + t.total.toFixed(2);
+    document.getElementById('payAmount').textContent = window.formatMoney(t.total);
     document.getElementById('cashReceived').value = '';
-    document.getElementById('changeDue').textContent = '$0.00';
+    document.getElementById('changeDue').textContent = window.formatMoney(0);
     currentTip = 0;
     document.querySelectorAll('.tip-btn').forEach((b) => (b.style.borderColor = 'var(--border)'));
+    renderQuickCashButtons(t.total);
     openModal('paymentModal');
 });
 document.querySelectorAll('.pay-method').forEach((el) => {
@@ -189,25 +224,19 @@ function calcChange() {
     const received = parseFloat(document.getElementById('cashReceived').value) || 0;
     const change = Math.max(0, received - t.total);
     const el = document.getElementById('changeDue');
-    el.textContent = '$' + change.toFixed(2);
+    el.textContent = window.formatMoney(change);
     el.style.color = received >= t.total ? 'var(--success)' : 'var(--danger)';
 }
 document.getElementById('cashReceived')?.addEventListener('input', calcChange);
-document.querySelectorAll('.quick-cash').forEach((btn) => {
-    btn.addEventListener('click', () => {
-        const amt = btn.dataset.amt;
-        document.getElementById('cashReceived').value = amt === 'exact' ? getCartTotals().total.toFixed(2) : amt;
-        calcChange();
-    });
-});
 document.querySelectorAll('.tip-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
         currentTip = parseFloat(btn.dataset.pct);
         const t = getCartTotals();
-        document.getElementById('payAmount').textContent = '$' + t.total.toFixed(2);
+        document.getElementById('payAmount').textContent = window.formatMoney(t.total);
         document.querySelectorAll('.tip-btn').forEach((b) => {
             b.style.borderColor = b === btn ? 'var(--accent)' : 'var(--border)';
         });
+        renderQuickCashButtons(t.total);
         calcChange();
     });
 });
@@ -254,7 +283,7 @@ document.getElementById('processPayBtn').addEventListener('click', async () => {
 function showReceipt(order) {
     const dateStr = new Date(order.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     const itemsHtml = order.items.map((it) => `
-        <div class="receipt-row"><span>${it.name} x${it.qty}</span><span>$${it.total.toFixed(2)}</span></div>
+        <div class="receipt-row"><span>${it.name} x${it.qty}</span><span>${window.formatMoney(it.total)}</span></div>
     `).join('');
     document.getElementById('receiptContent').innerHTML = `
         <div class="receipt">
@@ -267,12 +296,12 @@ function showReceipt(order) {
             <div class="receipt-divider"></div>
             ${itemsHtml}
             <div class="receipt-divider"></div>
-            <div class="receipt-row"><span>Subtotal</span><span>$${order.subtotal.toFixed(2)}</span></div>
-            ${order.discount_amount > 0 ? `<div class="receipt-row"><span>Discount</span><span>-$${order.discount_amount.toFixed(2)}</span></div>` : ''}
-            <div class="receipt-row"><span>${order.tax_name}</span><span>$${order.tax.toFixed(2)}</span></div>
-            ${order.tip > 0 ? `<div class="receipt-row"><span>Tip</span><span>$${order.tip.toFixed(2)}</span></div>` : ''}
+            <div class="receipt-row"><span>Subtotal</span><span>${window.formatMoney(order.subtotal)}</span></div>
+            ${order.discount_amount > 0 ? `<div class="receipt-row"><span>Discount</span><span>-${window.formatMoney(order.discount_amount)}</span></div>` : ''}
+            <div class="receipt-row"><span>${order.tax_name}</span><span>${window.formatMoney(order.tax)}</span></div>
+            ${order.tip > 0 ? `<div class="receipt-row"><span>Tip</span><span>${window.formatMoney(order.tip)}</span></div>` : ''}
             <div class="receipt-divider"></div>
-            <div class="receipt-row receipt-total"><span>TOTAL</span><span>$${order.total.toFixed(2)}</span></div>
+            <div class="receipt-row receipt-total"><span>TOTAL</span><span>${window.formatMoney(order.total)}</span></div>
             <div class="receipt-row"><span>Payment</span><span>${order.payment_method}</span></div>
             <div class="receipt-divider"></div>
             <div class="receipt-center" style="font-size:11px;">Thank you for visiting!</div>

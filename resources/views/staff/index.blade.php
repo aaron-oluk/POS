@@ -10,24 +10,36 @@
   </div>
   <button class="btn btn-primary btn-sm" onclick="openStaffModal()"><i class="fa-solid fa-user-plus"></i> Add Staff</button>
 </div>
-<div class="grid grid-3">
-  @foreach ($staff as $s)
-  <div class="card" style="text-align:center;">
-    <img src="https://picsum.photos/seed/{{ $s->avatar_seed }}/120/120.jpg" alt="{{ $s->name }}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;margin-bottom:12px;border:3px solid {{ $s->color }};">
-    <div style="font-weight:700;font-size:15px;">{{ $s->name }}</div>
-    <div style="font-size:12px;color:var(--fg-muted);margin:4px 0 12px;">{{ ucfirst($s->role) }}</div>
-    <div style="display:flex;justify-content:center;gap:4px;margin-bottom:12px;">
-      <span class="badge {{ $s->active ? 'badge-success' : 'badge-muted' }}">{{ $s->active ? 'Active' : 'Inactive' }}</span>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
-      <div class="card" style="padding:10px;background:var(--bg-hover);"><div style="font-size:10px;color:var(--fg-dim);">Sales</div><div style="font-family:'Figtree';font-weight:700;font-size:14px;">${{ number_format(($s->orders_sum_total ?? 0) / 1000, 1) }}k</div></div>
-      <div class="card" style="padding:10px;background:var(--bg-hover);"><div style="font-size:10px;color:var(--fg-dim);">Orders</div><div style="font-family:'Figtree';font-weight:700;font-size:14px;">{{ $s->orders_count }}</div></div>
-    </div>
-    <div style="display:flex;gap:6px;justify-content:center;">
-      <button class="btn btn-secondary btn-sm" onclick='openStaffModal(@json($s))'><i class="fa-solid fa-pen"></i> Edit</button>
-    </div>
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Staff</th><th>Role</th><th>Status</th><th>Sales</th><th>Orders</th><th>Actions</th></tr></thead>
+      <tbody>
+        @forelse ($staff as $s)
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <img src="https://picsum.photos/seed/{{ $s->avatar_seed }}/60/60.jpg" alt="{{ $s->name }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid {{ $s->color }};">
+              <div>
+                <div style="font-weight:600;">{{ $s->name }}</div>
+                <div style="font-size:11px;color:var(--fg-dim);">{{ $s->email }}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge badge-muted">{{ ucfirst($s->role) }}</span></td>
+          <td><span class="badge {{ $s->active ? 'badge-success' : 'badge-muted' }}">{{ $s->active ? 'Active' : 'Inactive' }}</span></td>
+          <td style="font-family:'Figtree';font-weight:600;">@money($s->orders_sum_total ?? 0)</td>
+          <td style="font-family:'Figtree';font-weight:600;">{{ $s->orders_count }}</td>
+          <td>
+            <button class="btn btn-secondary btn-sm btn-icon" title="Edit" onclick='openStaffModal(@json($s))'><i class="fa-solid fa-pen" style="font-size:11px;"></i></button>
+          </td>
+        </tr>
+        @empty
+        <tr><td colspan="6" style="text-align:center;color:var(--fg-muted);">No staff found</td></tr>
+        @endforelse
+      </tbody>
+    </table>
   </div>
-  @endforeach
 </div>
 @endsection
 
@@ -44,7 +56,7 @@
       <div class="modal-body">
         <div class="grid grid-2" style="gap:16px;">
           <div class="input-group"><label>Full Name</label><input type="text" class="input-field" name="name" id="sName" placeholder="Jane Smith" required></div>
-          <div class="input-group"><label>Email</label><input type="email" class="input-field" name="email" id="sEmail" placeholder="jane@nexuscoffee.com" required></div>
+          <div class="input-group"><label>Email</label><input type="email" class="input-field" name="email" id="sEmail" placeholder="jane@pos.com" required></div>
           <div class="input-group"><label>Role</label>
             <select class="input-field" name="role" id="sRole">
               <option value="cashier">Cashier</option>

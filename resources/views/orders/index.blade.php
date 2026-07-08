@@ -29,7 +29,7 @@
           <td style="font-weight:600;font-family:'Figtree';cursor:pointer;color:var(--accent);" onclick="showOrderDetail({{ $o->id }})">{{ $o->order_number }}</td>
           <td>{{ $o->customer?->full_name ?? 'Walk-in' }}</td>
           <td>{{ $o->items()->count() }} item{{ $o->items()->count() > 1 ? 's' : '' }}</td>
-          <td style="font-family:'Figtree';font-weight:600;">${{ number_format($o->total, 2) }}</td>
+          <td style="font-family:'Figtree';font-weight:600;">@money($o->total)</td>
           <td><span class="badge badge-muted">{{ \App\Models\Order::paymentLabel($o->payment_method) }}</span></td>
           <td><span class="badge badge-{{ ['completed'=>'success','pending'=>'warning','refunded'=>'danger','cancelled'=>'muted'][$o->status] }}">{{ ucfirst($o->status) }}</span></td>
           <td style="color:var(--fg-muted);font-size:12px;">{{ $o->created_at->format('M j, g:i A') }}</td>
@@ -90,14 +90,14 @@ async function showOrderDetail(id) {
       <h4 style="font-size:13px;margin-bottom:8px;">Items</h4>
       <div class="table-wrap"><table>
         <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
-        <tbody>${o.items.map((it) => `<tr><td>${it.icon} ${it.name}</td><td>${it.qty}</td><td>$${it.unit_price.toFixed(2)}</td><td style="font-weight:600;">$${it.total.toFixed(2)}</td></tr>`).join('')}</tbody>
+        <tbody>${o.items.map((it) => `<tr><td>${it.icon} ${it.name}</td><td>${it.qty}</td><td>${window.formatMoney(it.unit_price)}</td><td style="font-weight:600;">${window.formatMoney(it.total)}</td></tr>`).join('')}</tbody>
       </table></div>
       <div style="margin-top:12px;text-align:right;">
-        <div style="font-size:13px;color:var(--fg-muted);">Subtotal: $${o.subtotal.toFixed(2)}</div>
-        ${o.discount_amount > 0 ? `<div style="font-size:13px;color:var(--fg-muted);">Discount: -$${o.discount_amount.toFixed(2)}</div>` : ''}
-        <div style="font-size:13px;color:var(--fg-muted);">Tax: $${o.tax.toFixed(2)}</div>
-        ${o.tip > 0 ? `<div style="font-size:13px;color:var(--fg-muted);">Tip: $${o.tip.toFixed(2)}</div>` : ''}
-        <div style="font-family:'Figtree';font-size:22px;font-weight:700;margin-top:4px;">$${o.total.toFixed(2)}</div>
+        <div style="font-size:13px;color:var(--fg-muted);">Subtotal: ${window.formatMoney(o.subtotal)}</div>
+        ${o.discount_amount > 0 ? `<div style="font-size:13px;color:var(--fg-muted);">Discount: -${window.formatMoney(o.discount_amount)}</div>` : ''}
+        <div style="font-size:13px;color:var(--fg-muted);">Tax: ${window.formatMoney(o.tax)}</div>
+        ${o.tip > 0 ? `<div style="font-size:13px;color:var(--fg-muted);">Tip: ${window.formatMoney(o.tip)}</div>` : ''}
+        <div style="font-family:'Figtree';font-size:22px;font-weight:700;margin-top:4px;">${window.formatMoney(o.total)}</div>
       </div>
     `;
     openModal('orderDetailModal');

@@ -19,10 +19,10 @@
 </div>
 
 <div class="grid grid-4" style="margin-bottom:24px;">
-  <div class="card stat-card"><div class="stat-icon" style="background:var(--accent-dim);color:var(--accent);"><i class="fa-solid fa-dollar-sign"></i></div><div><div class="stat-label">Total Revenue</div><div class="stat-value">${{ number_format($totalRevenue, 0) }}</div></div></div>
+  <div class="card stat-card"><div class="stat-icon" style="background:var(--accent-dim);color:var(--accent);"><i class="fa-solid fa-dollar-sign"></i></div><div><div class="stat-label">Total Revenue</div><div class="stat-value">@money($totalRevenue)</div></div></div>
   <div class="card stat-card"><div class="stat-icon" style="background:var(--success-dim);color:var(--success);"><i class="fa-solid fa-bag-shopping"></i></div><div><div class="stat-label">Total Orders</div><div class="stat-value">{{ $totalOrders }}</div></div></div>
-  <div class="card stat-card"><div class="stat-icon" style="background:var(--info-dim);color:var(--info);"><i class="fa-solid fa-receipt"></i></div><div><div class="stat-label">Avg. Order</div><div class="stat-value">${{ number_format($avgOrder, 2) }}</div></div></div>
-  <div class="card stat-card"><div class="stat-icon" style="background:var(--warning-dim);color:var(--warning);"><i class="fa-solid fa-hand-holding-dollar"></i></div><div><div class="stat-label">Total Tips</div><div class="stat-value">${{ number_format($totalTips, 0) }}</div></div></div>
+  <div class="card stat-card"><div class="stat-icon" style="background:var(--info-dim);color:var(--info);"><i class="fa-solid fa-receipt"></i></div><div><div class="stat-label">Avg. Order</div><div class="stat-value">@money($avgOrder)</div></div></div>
+  <div class="card stat-card"><div class="stat-icon" style="background:var(--warning-dim);color:var(--warning);"><i class="fa-solid fa-hand-holding-dollar"></i></div><div><div class="stat-label">Total Tips</div><div class="stat-value">@money($totalTips)</div></div></div>
 </div>
 
 <div class="grid grid-2" style="margin-bottom:24px;">
@@ -45,7 +45,7 @@
         <div style="width:24px;font-family:'Figtree';font-weight:700;color:{{ $i === 0 ? 'var(--accent)' : ($i === 1 ? 'var(--fg-muted)' : ($i === 2 ? '#cd7f32' : 'var(--fg-dim)')) }};font-size:14px;">#{{ $i + 1 }}</div>
         <img src="https://picsum.photos/seed/{{ $s->avatar_seed }}/60/60.jpg" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
         <div style="flex:1;"><div style="font-size:13px;font-weight:600;">{{ $s->name }}</div><div style="font-size:11px;color:var(--fg-muted);">{{ ucfirst($s->role) }}</div></div>
-        <div style="text-align:right;"><div style="font-family:'Figtree';font-weight:700;">${{ number_format($s->orders_sum_total ?? 0, 0) }}</div><div style="font-size:11px;color:var(--fg-muted);">{{ $s->orders_count }} orders</div></div>
+        <div style="text-align:right;"><div style="font-family:'Figtree';font-weight:700;">@money($s->orders_sum_total ?? 0)</div><div style="font-size:11px;color:var(--fg-muted);">{{ $s->orders_count }} orders</div></div>
       </div>
       @empty
       <div style="text-align:center;color:var(--fg-muted);padding:16px;">No staff data</div>
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { display: false }, ticks: { color: textColor, font: { size: 11 } } },
-        y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 }, callback: (v) => '$' + v } },
+        y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 }, callback: (v) => window.formatMoney(v) } },
       },
     },
   });

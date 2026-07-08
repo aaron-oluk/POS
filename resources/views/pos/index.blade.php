@@ -73,14 +73,7 @@
           <label>Amount Received</label>
           <input type="number" class="input-field" id="cashReceived" placeholder="0.00" style="font-size:18px;font-family:'Figtree';font-weight:700;">
         </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
-          <button class="btn btn-secondary btn-sm quick-cash" data-amt="5">$5</button>
-          <button class="btn btn-secondary btn-sm quick-cash" data-amt="10">$10</button>
-          <button class="btn btn-secondary btn-sm quick-cash" data-amt="20">$20</button>
-          <button class="btn btn-secondary btn-sm quick-cash" data-amt="50">$50</button>
-          <button class="btn btn-secondary btn-sm quick-cash" data-amt="100">$100</button>
-          <button class="btn btn-secondary btn-sm quick-cash" data-amt="exact">Exact</button>
-        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;" id="quickCashButtons"></div>
         <div class="card" style="text-align:center;">
           <div style="font-size:12px;color:var(--fg-muted);margin-bottom:4px;">Change Due</div>
           <div style="font-family:'Figtree';font-size:28px;font-weight:700;color:var(--success);" id="changeDue">$0.00</div>

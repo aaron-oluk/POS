@@ -9,11 +9,21 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 @vite(['resources/css/app.css', 'resources/js/app.js'])
+@php
+  $__settings = \App\Models\Setting::current();
+  $__currencyConfig = [
+      'code' => $__settings->currency,
+      'symbol' => $__settings->currency_symbol,
+      'rate' => (float) $__settings->exchange_rate,
+      'decimals' => \App\Support\CurrencyDetector::decimalsFor($__settings->currency),
+  ];
+@endphp
 <script>
   (function () {
     var saved = localStorage.getItem('nexus-theme');
     if (saved) document.documentElement.dataset.theme = saved;
   })();
+  window.currency = @json($__currencyConfig);
 </script>
 @stack('head')
 </head>

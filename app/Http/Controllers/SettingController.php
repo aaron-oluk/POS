@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Setting;
+use App\Support\CurrencyConverter;
 use App\Support\CurrencyDetector;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,9 +34,19 @@ class SettingController extends Controller
         $data['dark_mode'] = $request->boolean('dark_mode');
         $data['compact_mode'] = $request->boolean('compact_mode');
         $data['sound_effects'] = $request->boolean('sound_effects');
-        $data['currency_symbol'] = CurrencyDetector::symbolFor($data['currency']);
 
-        Setting::current()->update($data);
+        $settings = Setting::current();
+        $oldCurrency = $settings->currency;
+        $oldRate = (float) $settings->exchange_rate;
+        $newRate = CurrencyDetector::rateFor($data['currency']);
+        $data['currency_symbol'] = CurrencyDetector::symbolFor($data['currency']);
+        $data['exchange_rate'] = $newRate;
+
+        $settings->update($data);
+
+        if ($data['currency'] !== $oldCurrency) {
+            CurrencyConverter::convertAll($oldRate, $newRate, CurrencyDetector::decimalsFor($data['currency']));
+        }
 
         return back()->with('success', 'Settings saved successfully.');
     }

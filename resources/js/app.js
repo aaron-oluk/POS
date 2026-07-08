@@ -1,5 +1,18 @@
 import './bootstrap';
 
+// ===== CURRENCY (window.currency injected by the layout from Setting::current()) =====
+// Prices/totals are stored natively in the active currency (converted server-side
+// by App\Support\CurrencyConverter whenever the currency setting changes), so this
+// is purely presentational: decimal precision + symbol placement.
+window.formatMoney = function (amount) {
+    const currency = window.currency || { symbol: '$', decimals: 2 };
+    const formatted = (Number(amount) || 0).toLocaleString('en-US', {
+        minimumFractionDigits: currency.decimals,
+        maximumFractionDigits: currency.decimals,
+    });
+    return currency.symbol.length > 1 ? `${currency.symbol} ${formatted}` : `${currency.symbol}${formatted}`;
+};
+
 // ===== CSRF for fetch() calls =====
 window.csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 

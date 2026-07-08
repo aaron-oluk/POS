@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Setting;
+use App\Support\CurrencyConverter;
 use App\Support\CurrencyDetector;
 use Illuminate\Database\Seeder;
 
@@ -20,6 +21,7 @@ class SettingSeeder extends Seeder
             'address' => '123 Main Street, Downtown',
             'currency' => $currency['code'],
             'currency_symbol' => $currency['symbol'],
+            'exchange_rate' => $currency['rate'],
             'timezone' => 'America/New_York',
             'dark_mode' => true,
             'compact_mode' => false,
@@ -43,5 +45,9 @@ class SettingSeeder extends Seeder
             'tax_included' => false,
             'round_tax' => true,
         ]);
+
+        // Seed prices are authored in plain USD-scale numbers (e.g. Espresso 3.50);
+        // rescale them into the detected currency now, before any orders are seeded.
+        CurrencyConverter::convertProducts($currency['rate'], CurrencyDetector::decimalsFor($currency['code']));
     }
 }

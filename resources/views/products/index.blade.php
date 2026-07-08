@@ -18,7 +18,7 @@
   <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--accent-dim);color:var(--accent);width:40px;height:40px;font-size:15px;"><i class="fa-solid fa-box"></i></div><div><div class="stat-label">Total Products</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $totalProducts }}</div></div></div>
   <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--warning-dim);color:var(--warning);width:40px;height:40px;font-size:15px;"><i class="fa-solid fa-triangle-exclamation"></i></div><div><div class="stat-label">Low Stock</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $lowStock }}</div></div></div>
   <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--danger-dim);color:var(--danger);width:40px;height:40px;font-size:15px;"><i class="fa-solid fa-ban"></i></div><div><div class="stat-label">Out of Stock</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $outOfStock }}</div></div></div>
-  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--success-dim);color:var(--success);width:40px;height:40px;font-size:15px;"><i class="fa-solid fa-dollar-sign"></i></div><div><div class="stat-label">Inventory Value</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">${{ number_format($inventoryValue, 0) }}</div></div></div>
+  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--success-dim);color:var(--success);width:40px;height:40px;font-size:15px;"><i class="fa-solid fa-dollar-sign"></i></div><div><div class="stat-label">Inventory Value</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">@money($inventoryValue)</div></div></div>
 </div>
 
 <div class="card">
@@ -49,7 +49,7 @@
         <tr>
           <td><div style="display:flex;align-items:center;gap:10px;"><span style="font-size:22px;">{{ $p->icon }}</span><div><div style="font-weight:600;">{{ $p->name }}</div><div style="font-size:11px;color:var(--fg-dim);">{{ $p->sku }}</div></div></div></td>
           <td><span class="badge badge-muted">{{ $p->category->name }}</span></td>
-          <td style="font-family:'Figtree';font-weight:600;">${{ number_format($p->price, 2) }}</td>
+          <td style="font-family:'Figtree';font-weight:600;">@money($p->price)</td>
           <td><span style="font-family:'Figtree';font-weight:600;{{ $p->stock <= 15 ? 'color:var(--danger);' : '' }}">{{ $p->stock }}</span></td>
           <td>
             @if ($p->stock <= 0)<span class="badge badge-danger">Out of Stock</span>

@@ -26,6 +26,7 @@ class Setting extends Model
             'tax_included' => 'boolean',
             'round_tax' => 'boolean',
             'tax_rate' => 'decimal:2',
+            'exchange_rate' => 'decimal:4',
         ];
     }
 
@@ -37,7 +38,23 @@ class Setting extends Model
             return static::query()->firstOrCreate(['id' => 1], [
                 'currency' => $detected['code'],
                 'currency_symbol' => $detected['symbol'],
+                'exchange_rate' => $detected['rate'],
             ]);
         });
+    }
+
+    /**
+     * Format an amount for display. Prices/totals are stored natively in
+     * the active currency (see App\Support\CurrencyConverter, which rescales
+     * every stored value whenever the currency setting changes), so this is
+     * purely presentational: decimal precision + symbol placement.
+     */
+    public function money(float|int|string $amount): string
+    {
+        $decimals = CurrencyDetector::decimalsFor($this->currency);
+        $formatted = number_format((float) $amount, $decimals);
+        $symbol = (string) $this->currency_symbol;
+
+        return mb_strlen($symbol) > 1 ? "{$symbol} {$formatted}" : "{$symbol}{$formatted}";
     }
 }

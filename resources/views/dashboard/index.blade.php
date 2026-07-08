@@ -24,7 +24,7 @@
 <div class="grid grid-4" style="margin-bottom:24px;">
   <div class="card stat-card">
     <div class="stat-icon" style="background:var(--accent-dim);color:var(--accent);"><i class="fa-solid fa-dollar-sign"></i></div>
-    <div><div class="stat-label">Today's Revenue</div><div class="stat-value">${{ number_format($todayRevenue, 2) }}</div>{!! $fmtChange($revenueChange) !!}</div>
+    <div><div class="stat-label">Today's Revenue</div><div class="stat-value">@money($todayRevenue)</div>{!! $fmtChange($revenueChange) !!}</div>
   </div>
   <div class="card stat-card">
     <div class="stat-icon" style="background:var(--success-dim);color:var(--success);"><i class="fa-solid fa-bag-shopping"></i></div>
@@ -32,7 +32,7 @@
   </div>
   <div class="card stat-card">
     <div class="stat-icon" style="background:var(--info-dim);color:var(--info);"><i class="fa-solid fa-cart-shopping"></i></div>
-    <div><div class="stat-label">Avg. Order Value</div><div class="stat-value">${{ number_format($todayAov, 2) }}</div>{!! $fmtChange($aovChange) !!}</div>
+    <div><div class="stat-label">Avg. Order Value</div><div class="stat-value">@money($todayAov)</div>{!! $fmtChange($aovChange) !!}</div>
   </div>
   <div class="card stat-card">
     <div class="stat-icon" style="background:var(--warning-dim);color:var(--warning);"><i class="fa-solid fa-users"></i></div>
@@ -69,7 +69,7 @@
           <tr>
             <td style="font-weight:600;font-family:'Figtree';">{{ $o->order_number }}</td>
             <td>{{ $o->customer?->full_name ?? 'Walk-in' }}</td>
-            <td style="font-family:'Figtree';font-weight:600;">${{ number_format($o->total, 2) }}</td>
+            <td style="font-family:'Figtree';font-weight:600;">@money($o->total)</td>
             <td><span class="badge badge-{{ ['completed'=>'success','pending'=>'warning','refunded'=>'danger','cancelled'=>'muted'][$o->status] }}">{{ ucfirst($o->status) }}</span></td>
           </tr>
           @empty
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 } } },
-        y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 }, callback: (v) => '$' + v } },
+        y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 }, callback: (v) => window.formatMoney(v) } },
       },
     },
   });
