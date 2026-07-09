@@ -39,7 +39,7 @@
       <div class="nav-section">
         <div class="nav-section-title">Main</div>
         <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="bx bxs-dashboard"></i><span>Dashboard</span></a>
-        <a href="{{ route('pos.index') }}" class="nav-item {{ request()->routeIs('pos.*') ? 'active' : '' }}"><i class="bx bxs-store-alt"></i><span>POS Terminal</span></a>
+        <a href="{{ route('pos.index') }}" class="nav-item {{ request()->routeIs('pos.*') ? 'active' : '' }}"><i class="bx bxs-store-alt"></i><span>{{ \App\Models\Setting::current()->self_checkout_enabled ? 'Self-Checkout' : 'POS Terminal' }}</span></a>
         <a href="{{ route('orders.index') }}" class="nav-item {{ request()->routeIs('orders.*') ? 'active' : '' }}"><i class="bx bxs-receipt"></i><span>Orders</span></a>
         <a href="{{ route('cash-register.index') }}" class="nav-item {{ request()->routeIs('cash-register.*') ? 'active' : '' }}"><i class="bx bxs-wallet"></i><span>Cash Register</span></a>
       </div>
@@ -50,7 +50,7 @@
         @if (auth()->user()->isManager())
         <a href="{{ route('purchases.index') }}" class="nav-item {{ request()->routeIs('purchases.*') ? 'active' : '' }}"><i class="bx bxs-truck"></i><span>Purchasing</span></a>
         <a href="{{ route('stock-adjustments.index') }}" class="nav-item {{ request()->routeIs('stock-adjustments.*') ? 'active' : '' }}"><i class="bx bxs-edit-alt"></i><span>Stock Adjustments</span></a>
-        <a href="{{ route('modifiers.index') }}" class="nav-item {{ request()->routeIs('modifiers.*') ? 'active' : '' }}"><i class="bx bxs-slider-alt"></i><span>Modifiers</span></a>
+        <a href="{{ route('modifiers.index') }}" class="nav-item {{ request()->routeIs('modifiers.*') ? 'active' : '' }}"><i class="bx bx-slider-alt"></i><span>Modifiers</span></a>
         <a href="{{ route('staff.index') }}" class="nav-item {{ request()->routeIs('staff.*') ? 'active' : '' }}"><i class="bx bxs-briefcase"></i><span>Staff</span></a>
         @endif
       </div>

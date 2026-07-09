@@ -50,6 +50,11 @@ class PurchaseTest extends TestCase
         $this->assertEquals(19.00, (float) $purchase->amount_paid);
         $this->assertEquals(0, $purchase->balance_due);
         $this->assertSame('paid', $purchase->payment_status);
+
+        // The initial payment is logged in the ledger with who made it and how.
+        $this->assertDatabaseHas('purchase_payments', [
+            'purchase_id' => $purchase->id, 'user_id' => $manager->id, 'method' => 'cash', 'amount' => 19.00,
+        ]);
     }
 
     public function test_a_purchase_can_be_recorded_as_partially_paid_on_credit(): void
@@ -66,6 +71,7 @@ class PurchaseTest extends TestCase
             'supplier_id' => $supplier->id,
             'supply_date' => '2026-07-08',
             'amount_paid' => 5,
+            'payment_method' => 'cash',
             'items' => [
                 ['product_id' => $product->id, 'quantity' => 20, 'unit_cost' => 0.95],
             ],
@@ -76,14 +82,30 @@ class PurchaseTest extends TestCase
         $this->assertEquals(14, $purchase->balance_due);
         $this->assertSame('partial', $purchase->payment_status);
 
-        // Settle the remaining balance later, on a different date.
-        $this->actingAs($manager)->put("/purchases/{$purchase->id}/pay", ['amount' => 14])
-            ->assertRedirect();
+        // Settle the remaining balance later, on a different date, via a different representative and method.
+        $accountant = User::factory()->create(['role' => 'manager', 'active' => true]);
+        $this->actingAs($accountant)->put("/purchases/{$purchase->id}/pay", [
+            'amount' => 14, 'method' => 'bank', 'paid_on' => '2026-07-09', 'notes' => 'Wired via Highland business account',
+        ])->assertRedirect();
 
         $purchase->refresh();
         $this->assertEquals(19, (float) $purchase->amount_paid);
         $this->assertEquals(0, $purchase->balance_due);
         $this->assertSame('paid', $purchase->payment_status);
+
+        $this->assertDatabaseHas('purchase_payments', [
+            'purchase_id' => $purchase->id, 'user_id' => $manager->id, 'method' => 'cash', 'amount' => 5,
+        ]);
+        $this->assertDatabaseHas('purchase_payments', [
+            'purchase_id' => $purchase->id, 'user_id' => $accountant->id, 'method' => 'bank', 'amount' => 14,
+            'notes' => 'Wired via Highland business account',
+        ]);
+
+        // The payment-history endpoint reflects both entries with who made them.
+        $json = $this->actingAs($manager)->getJson("/purchases/{$purchase->id}/payments")->json();
+        $this->assertCount(2, $json['payments']);
+        $recordedBy = collect($json['payments'])->pluck('recorded_by')->sort()->values()->all();
+        $this->assertEqualsCanonicalizing([$accountant->name, $manager->name], $recordedBy);
     }
 
     public function test_supplier_payment_cannot_exceed_the_outstanding_balance(): void
@@ -105,7 +127,7 @@ class PurchaseTest extends TestCase
 
         $purchase = Purchase::first();
 
-        $this->actingAs($manager)->put("/purchases/{$purchase->id}/pay", ['amount' => 100])
+        $this->actingAs($manager)->put("/purchases/{$purchase->id}/pay", ['amount' => 100, 'method' => 'cash'])
             ->assertRedirect();
 
         $this->assertEquals(0, (float) $purchase->fresh()->amount_paid);

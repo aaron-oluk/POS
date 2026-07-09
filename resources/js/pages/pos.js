@@ -319,11 +319,19 @@ document.getElementById('removeDiscountBtn').addEventListener('click', () => {
 // "split" mode — a per-method amount input appears for each selected method,
 // and a running Remaining/Change Due indicator tracks whether they add up.
 
-let selectedPayMethods = new Set(['cash']);
-let splitAmounts = {};
-
 const METHOD_LABELS = { cash: 'Cash', card: 'Card', mobile: 'Mobile' };
 const METHOD_ORDER = ['cash', 'card', 'mobile'];
+
+// Cash may not be rendered at all in self-checkout mode, so the default
+// selection is whichever method button actually exists first (in
+// METHOD_ORDER), not a hardcoded 'cash'.
+function firstAvailableMethod() {
+    const available = [...document.querySelectorAll('.pay-method')].map((el) => el.dataset.method);
+    return METHOD_ORDER.find((m) => available.includes(m)) || available[0];
+}
+
+let selectedPayMethods = new Set();
+let splitAmounts = {};
 
 function round2(n) {
     return Math.round((n + Number.EPSILON) * 100) / 100;
@@ -462,10 +470,11 @@ document.getElementById('showPaymentBtn').addEventListener('click', () => {
     currentTip = 0;
     document.querySelectorAll('.tip-btn').forEach((b) => (b.style.borderColor = 'var(--border)'));
 
-    // Reset to the simple single-cash flow every time the modal opens.
-    selectedPayMethods = new Set(['cash']);
+    // Reset to a single default method every time the modal opens.
+    const defaultMethod = firstAvailableMethod();
+    selectedPayMethods = new Set([defaultMethod]);
     splitAmounts = {};
-    document.querySelectorAll('.pay-method').forEach((m) => m.classList.toggle('selected', m.dataset.method === 'cash'));
+    document.querySelectorAll('.pay-method').forEach((m) => m.classList.toggle('selected', m.dataset.method === defaultMethod));
     renderPaymentModalBody();
 
     openModal('paymentModal');

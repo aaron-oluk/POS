@@ -49,9 +49,12 @@
             <td style="color:var(--fg-muted);">{{ $p->supply_date?->format('M j, Y') ?? '—' }}</td>
             <td>{{ $p->user->name }}</td>
             <td>
-              @if ($p->balance_due > 0)
-              <button class="btn btn-secondary btn-sm" data-pay-id="{{ $p->id }}" data-pay-ref="{{ $poNumber }}" data-pay-balance="{{ (float) $p->balance_due }}" onclick="openPayModal(this.dataset)"><i class="bx bx-money"></i> Record Payment</button>
-              @endif
+              <div style="display:flex;gap:4px;">
+                <button class="btn btn-secondary btn-sm btn-icon" aria-label="View payment history" data-tooltip="View payment history" data-history-id="{{ $p->id }}" data-history-ref="{{ $poNumber }}" onclick="openPaymentsModal(this.dataset)"><i class="bx bx-history" style="font-size:11px;"></i></button>
+                @if ($p->balance_due > 0)
+                <button class="btn btn-secondary btn-sm" data-pay-id="{{ $p->id }}" data-pay-ref="{{ $poNumber }}" data-pay-balance="{{ (float) $p->balance_due }}" onclick="openPayModal(this.dataset)"><i class="bx bx-money"></i> Record Payment</button>
+                @endif
+              </div>
             </td>
           </tr>
           @empty
@@ -121,6 +124,13 @@
           <div class="input-group"><label>Date Supplied</label><input type="date" class="input-field" name="supply_date" id="puSupplyDate" max="{{ now()->format('Y-m-d') }}" required></div>
           <div class="input-group"><label>Amount Paid Now <span style="font-weight:400;color:var(--fg-dim);">(optional)</span></label><input type="number" class="input-field" name="amount_paid" id="puAmountPaid" step="0.01" min="0" placeholder="Defaults to full total"></div>
         </div>
+        <div class="input-group" style="margin-bottom:12px;"><label>Paid Via</label>
+          <select class="input-field" name="payment_method" id="puPaymentMethod">
+            <option value="cash">Cash</option>
+            <option value="bank">Bank Transfer</option>
+            <option value="mobile_money">Mobile Money</option>
+          </select>
+        </div>
         <div style="font-size:11px;color:var(--fg-dim);margin:-8px 0 12px;">Leave "Amount Paid" blank to record the purchase as paid in full. Enter a smaller amount (or 0) if the supplier is extending credit — the remaining balance can be settled later from the purchase history table.</div>
         <div class="input-group" style="margin-bottom:12px;"><label>Notes</label><textarea class="input-field" name="notes" rows="2"></textarea></div>
 
@@ -182,13 +192,46 @@
           <div style="font-size:12px;color:var(--fg-muted);margin-bottom:4px;">Balance Owed</div>
           <div style="font-family:'Figtree';font-size:22px;font-weight:700;color:var(--danger);" id="payBalanceDisplay">$0.00</div>
         </div>
-        <div class="input-group"><label>Amount to Pay</label><input type="number" class="input-field" name="amount" id="payAmountInput" step="0.01" min="0.01" required autofocus></div>
+        <div class="input-group" style="margin-bottom:12px;"><label>Amount to Pay</label><input type="number" class="input-field" name="amount" id="payAmountInput" step="0.01" min="0.01" required autofocus></div>
+        <div class="grid grid-2" style="gap:16px;margin-bottom:12px;">
+          <div class="input-group"><label>Paid Via</label>
+            <select class="input-field" name="method">
+              <option value="cash">Cash</option>
+              <option value="bank">Bank Transfer</option>
+              <option value="mobile_money">Mobile Money</option>
+            </select>
+          </div>
+          <div class="input-group"><label>Date Paid</label><input type="date" class="input-field" name="paid_on" id="payPaidOnInput" max="{{ now()->format('Y-m-d') }}"></div>
+        </div>
+        <div class="input-group"><label>Notes <span style="font-weight:400;color:var(--fg-dim);">(optional)</span></label><input type="text" class="input-field" name="notes" placeholder="e.g. Settled via till"></div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeModal('payModal')">Cancel</button>
         <button type="submit" class="btn btn-primary"><i class="bx bx-check"></i> Record Payment</button>
       </div>
     </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="paymentsHistoryModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="paymentsHistoryTitle">Payment History</h3>
+      <button class="modal-close" onclick="closeModal('paymentsHistoryModal')" aria-label="Close" data-tooltip="Close"><i class="bx bx-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Amount</th><th>Method</th><th>Recorded By</th><th>Notes</th></tr></thead>
+          <tbody id="paymentsHistoryBody">
+            <tr><td colspan="5" style="text-align:center;color:var(--fg-muted);">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" onclick="closeModal('paymentsHistoryModal')">Close</button>
+    </div>
   </div>
 </div>
 @endpush
@@ -279,7 +322,35 @@ function openPayModal(dataset) {
   const amountInput = document.getElementById('payAmountInput');
   amountInput.max = balance;
   amountInput.value = balance;
+  document.getElementById('payPaidOnInput').value = new Date().toISOString().slice(0, 10);
   openModal('payModal');
+}
+
+async function openPaymentsModal(dataset) {
+  document.getElementById('paymentsHistoryTitle').textContent = `Payment History — ${dataset.historyRef}`;
+  document.getElementById('paymentsHistoryBody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--fg-muted);">Loading...</td></tr>';
+  openModal('paymentsHistoryModal');
+
+  try {
+    const res = await fetch(`/purchases/${dataset.historyId}/payments`, { headers: { Accept: 'application/json' } });
+    const data = await res.json();
+    const body = document.getElementById('paymentsHistoryBody');
+    if (!data.payments.length) {
+      body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--fg-muted);">No payments recorded yet — this purchase is entirely on credit.</td></tr>';
+      return;
+    }
+    body.innerHTML = data.payments.map((p) => `
+      <tr>
+        <td style="color:var(--fg-muted);">${p.paid_on}</td>
+        <td style="font-family:'Figtree';font-weight:600;">${window.formatMoney(p.amount)}</td>
+        <td><span class="badge badge-muted">${p.method}</span></td>
+        <td>${p.recorded_by}</td>
+        <td style="color:var(--fg-muted);font-size:11px;">${p.notes ?? '—'}</td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    document.getElementById('paymentsHistoryBody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--danger);">Failed to load payment history.</td></tr>';
+  }
 }
 
 function openSupplierModal(supplier) {

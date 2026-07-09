@@ -1,8 +1,17 @@
 @extends('layouts.app')
 
-@section('title', 'POS Terminal')
+@section('title', $settings->self_checkout_enabled ? 'Self-Checkout' : 'POS Terminal')
 
 @section('content')
+@if ($settings->self_checkout_enabled)
+<div class="page-header" style="margin-bottom:12px;">
+  <div>
+    <h1 class="page-title">Self-Checkout</h1>
+    <p class="page-subtitle">Scan or tap your items, then pay by card or mobile — cash is not accepted at this terminal</p>
+  </div>
+  <span class="badge badge-info"><i class="bx bx-scan"></i> Self-Checkout Mode</span>
+</div>
+@endif
 <div class="pos-layout">
   <div class="pos-products">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
@@ -20,7 +29,7 @@
   </div>
   <div class="pos-cart" id="posCart">
     <div class="pos-cart-header">
-      <h3>Current Order</h3>
+      <h3>{{ $settings->self_checkout_enabled ? 'Your Order' : 'Current Order' }}</h3>
       <div style="display:flex;gap:6px;">
         <button class="btn-icon btn-secondary" id="holdOrderBtn" aria-label="Hold Order" data-tooltip="Hold Order"><i class="bx bx-pause"></i></button>
         <button class="btn-icon btn-danger" id="clearCartBtn" aria-label="Clear Cart" data-tooltip="Clear Cart"><i class="bx bxs-trash"></i></button>
@@ -62,8 +71,8 @@
     <div class="modal-body">
       <div class="pay-amount-display"><div class="label">Amount Due</div><div class="amount" id="payAmount">$0.00</div></div>
       <div class="payment-methods" id="payMethods">
-        @if ($settings->cash_enabled)
-        <button type="button" class="pay-method selected" data-method="cash"><i class="bx bx-money"></i><span>Cash</span></button>
+        @if ($settings->cash_enabled && ! $settings->self_checkout_enabled)
+        <button type="button" class="pay-method" data-method="cash"><i class="bx bx-money"></i><span>Cash</span></button>
         @endif
         @if ($settings->card_enabled)
         <button type="button" class="pay-method" data-method="card"><i class="bx bxs-credit-card"></i><span>Card</span></button>
@@ -183,6 +192,7 @@
     categories: @json($posCategories),
     taxRate: {{ (float) $settings->tax_rate }},
     checkoutUrl: @json(route('pos.checkout')),
+    selfCheckout: {{ $settings->self_checkout_enabled ? 'true' : 'false' }},
   };
 </script>
 @vite(['resources/js/pages/pos.js'])

@@ -60,6 +60,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/purchases', [PurchaseController::class, 'index'])->name('purchases.index');
         Route::post('/purchases', [PurchaseController::class, 'store'])->name('purchases.store');
         Route::put('/purchases/{purchase}/pay', [PurchaseController::class, 'pay'])->name('purchases.pay');
+        Route::get('/purchases/{purchase}/payments', [PurchaseController::class, 'payments'])->name('purchases.payments');
         Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
         Route::put('/suppliers/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');
         Route::delete('/suppliers/{supplier}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');

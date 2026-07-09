@@ -74,7 +74,7 @@ class SettingController extends Controller
             'tip_options' => ['required', 'string'],
             'default_tip' => ['required', 'string'],
         ]);
-        foreach (['cash_enabled', 'card_enabled', 'mobile_enabled', 'gift_cards_enabled', 'split_payment_enabled', 'prompt_tips'] as $flag) {
+        foreach (['cash_enabled', 'card_enabled', 'mobile_enabled', 'gift_cards_enabled', 'split_payment_enabled', 'self_checkout_enabled', 'prompt_tips'] as $flag) {
             $data[$flag] = $request->boolean($flag);
         }
 

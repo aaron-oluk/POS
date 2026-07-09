@@ -22,6 +22,7 @@ class Setting extends Model
             'mobile_enabled' => 'boolean',
             'gift_cards_enabled' => 'boolean',
             'split_payment_enabled' => 'boolean',
+            'self_checkout_enabled' => 'boolean',
             'prompt_tips' => 'boolean',
             'tax_included' => 'boolean',
             'round_tax' => 'boolean',

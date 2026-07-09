@@ -9,6 +9,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
+use App\Models\PurchasePayment;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -97,6 +98,10 @@ class CurrencyConverter
                 'unit_cost' => round((float) $item->unit_cost * $ratio, $decimals),
                 'total' => round((float) $item->total * $ratio, $decimals),
             ]);
+        });
+
+        PurchasePayment::query()->each(function (PurchasePayment $payment) use ($ratio, $decimals) {
+            $payment->update(['amount' => round((float) $payment->amount * $ratio, $decimals)]);
         });
     }
 

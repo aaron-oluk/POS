@@ -47,6 +47,10 @@ class PosController extends Controller
 
         $settings = Setting::current();
 
+        if ($settings->self_checkout_enabled && collect($data['payments'])->contains('method', 'cash')) {
+            abort(422, 'Cash payments are not available in self-checkout mode.');
+        }
+
         return DB::transaction(function () use ($data, $settings, $request) {
             $products = Product::whereIn('id', collect($data['items'])->pluck('product_id'))
                 ->lockForUpdate()

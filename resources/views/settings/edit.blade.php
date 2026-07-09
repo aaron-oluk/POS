@@ -100,7 +100,15 @@
 <div id="settings-payment" class="settings-section" style="display:none;">
   <form method="POST" action="{{ route('settings.payment') }}">
     @csrf @method('PUT')
-    <h3>Payment Methods</h3>
+    <h3>Checkout Mode</h3>
+    <div class="settings-row">
+      <div>
+        <div class="settings-row-label">Self-Checkout</div>
+        <div class="settings-row-desc">Customers complete their own order at the terminal without a cashier. Cash is never offered as a payment option in this mode — regardless of the Cash toggle below — since there's no attendant to handle cash or give change.</div>
+      </div>
+      <label class="toggle"><input type="checkbox" name="self_checkout_enabled" {{ $settings->self_checkout_enabled ? 'checked' : '' }}><span class="toggle-slider"></span></label>
+    </div>
+    <h3 style="margin-top:24px;">Payment Methods</h3>
     @foreach ([
       'cash_enabled' => ['Cash', 'Accept cash payments with change calculation'],
       'card_enabled' => ['Credit/Debit Card', 'Process card payments via terminal integration'],

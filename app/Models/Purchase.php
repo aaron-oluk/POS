@@ -34,6 +34,17 @@ class Purchase extends Model
         return $this->hasMany(PurchaseItem::class);
     }
 
+    /**
+     * Ledger of individual payments made to the supplier for this purchase —
+     * who recorded it and whether it went out as cash, bank transfer, or
+     * mobile money. `amount_paid` is a running total kept in sync with the
+     * sum of these rows so balance/status can be read without aggregating.
+     */
+    public function payments()
+    {
+        return $this->hasMany(PurchasePayment::class);
+    }
+
     public function getBalanceDueAttribute(): float
     {
         return round((float) $this->total - (float) $this->amount_paid, 2);
