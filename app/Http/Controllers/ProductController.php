@@ -76,6 +76,7 @@ class ProductController extends Controller
             'cost' => ['nullable', 'numeric', 'min:0'],
             'stock' => ['nullable', 'integer', 'min:0'],
             'sku' => ['required', 'string', 'max:50', 'unique:products,sku,'.$ignoreId],
+            'barcode' => ['nullable', 'string', 'max:50', 'unique:products,barcode,'.$ignoreId],
             'description' => ['nullable', 'string'],
         ]);
     }

@@ -7,6 +7,10 @@
   <div class="pos-products">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
       <div class="pos-categories" id="posCategories"></div>
+      <div class="topbar-search" style="max-width:200px;">
+        <i class="bx bx-barcode"></i>
+        <input type="text" placeholder="Scan barcode..." id="posBarcode" aria-label="Scan barcode">
+      </div>
       <div class="topbar-search" style="max-width:240px;">
         <i class="bx bxs-search"></i>
         <input type="text" placeholder="Search items..." id="posSearch" aria-label="Search POS items">
@@ -131,6 +135,20 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="customizeModal">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-header">
+      <h3 id="customizeModalTitle">Customize Item</h3>
+      <button class="modal-close" onclick="closeModal('customizeModal')" aria-label="Close" data-tooltip="Close"><i class="bx bx-x"></i></button>
+    </div>
+    <div class="modal-body" id="customizeModalBody"></div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" onclick="closeModal('customizeModal')">Cancel</button>
+      <button type="button" class="btn btn-primary" id="customizeAddBtn"><i class="bx bx-cart-add"></i> Add to Cart</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="receiptModal">
   <div class="modal" style="max-width:400px;">
     <div class="modal-header">
@@ -150,7 +168,11 @@
   $posProducts = $products->map(fn ($p) => [
       'id' => $p->id, 'name' => $p->name, 'category' => $p->category->name,
       'price' => (float) $p->price, 'stock' => $p->stock, 'sku' => $p->sku,
-      'icon' => $p->icon, 'desc' => $p->description,
+      'barcode' => $p->barcode, 'icon' => $p->icon, 'desc' => $p->description,
+      'modifierGroups' => $p->modifierGroups->map(fn ($g) => [
+          'id' => $g->id, 'name' => $g->name, 'multiple' => (bool) $g->multiple,
+          'options' => $g->options->map(fn ($o) => ['id' => $o->id, 'name' => $o->name, 'price_delta' => (float) $o->price_delta]),
+      ]),
   ])->values();
   $posCategories = collect(['All'])->concat($categories);
 @endphp

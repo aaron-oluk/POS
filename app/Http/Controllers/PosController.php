@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Customer;
+use App\Models\ModifierOption;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\OrderItemModifier;
 use App\Models\OrderPayment;
 use App\Models\Product;
 use App\Models\Setting;
@@ -20,7 +22,7 @@ class PosController extends Controller
     {
         return view('pos.index', [
             'categories' => Category::orderBy('name')->pluck('name'),
-            'products' => Product::with('category')->orderBy('name')->get(),
+            'products' => Product::with('category', 'modifierGroups.options')->orderBy('name')->get(),
             'customers' => Customer::orderBy('first_name')->get(),
             'settings' => Setting::current(),
         ]);
@@ -32,6 +34,8 @@ class PosController extends Controller
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'integer', 'exists:products,id'],
             'items.*.qty' => ['required', 'integer', 'min:1'],
+            'items.*.modifier_option_ids' => ['nullable', 'array'],
+            'items.*.modifier_option_ids.*' => ['integer', 'exists:modifier_options,id'],
             'discount_type' => ['nullable', 'in:percent,fixed'],
             'discount_value' => ['nullable', 'numeric', 'min:0'],
             'tip_percent' => ['nullable', 'numeric', 'min:0'],
@@ -49,6 +53,9 @@ class PosController extends Controller
                 ->get()
                 ->keyBy('id');
 
+            $optionIds = collect($data['items'])->flatMap(fn ($i) => $i['modifier_option_ids'] ?? [])->unique();
+            $modifierOptions = ModifierOption::whereIn('id', $optionIds)->get()->keyBy('id');
+
             $subtotal = 0;
             $lines = [];
 
@@ -59,13 +66,20 @@ class PosController extends Controller
                     abort(422, "Not enough stock for {$product?->name}.");
                 }
 
-                $lineTotal = round($product->price * $item['qty'], 2);
+                $selectedModifiers = collect($item['modifier_option_ids'] ?? [])
+                    ->map(fn ($id) => $modifierOptions->get($id))
+                    ->filter();
+                $unitPrice = round((float) $product->price + $selectedModifiers->sum(fn ($o) => (float) $o->price_delta), 2);
+
+                $lineTotal = round($unitPrice * $item['qty'], 2);
                 $subtotal += $lineTotal;
 
                 $lines[] = [
                     'product' => $product,
                     'qty' => $item['qty'],
+                    'unit_price' => $unitPrice,
                     'total' => $lineTotal,
+                    'modifiers' => $selectedModifiers,
                 ];
             }
             $subtotal = round($subtotal, 2);
@@ -151,19 +165,29 @@ class PosController extends Controller
             }
 
             foreach ($lines as $line) {
-                OrderItem::create([
+                $orderItem = OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $line['product']->id,
                     'product_name' => $line['product']->name,
                     'product_icon' => $line['product']->icon,
-                    'unit_price' => $line['product']->price,
+                    'unit_price' => $line['unit_price'],
                     'quantity' => $line['qty'],
                     'total' => $line['total'],
                 ]);
+
+                foreach ($line['modifiers'] as $option) {
+                    OrderItemModifier::create([
+                        'order_item_id' => $orderItem->id,
+                        'modifier_option_id' => $option->id,
+                        'name' => $option->name,
+                        'price_delta' => $option->price_delta,
+                    ]);
+                }
+
                 $line['product']->decrement('stock', $line['qty']);
             }
 
-            $order->load('items', 'customer', 'cashier', 'payments');
+            $order->load('items.modifiers', 'customer', 'cashier', 'payments');
 
             return response()->json([
                 'order' => [
@@ -177,6 +201,7 @@ class PosController extends Controller
                         'qty' => $i->quantity,
                         'unit_price' => (float) $i->unit_price,
                         'total' => (float) $i->total,
+                        'modifiers' => $i->modifiers->pluck('name'),
                     ]),
                     'subtotal' => (float) $order->subtotal,
                     'discount_amount' => (float) $order->discount_amount,

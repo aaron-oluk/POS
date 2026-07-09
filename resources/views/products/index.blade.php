@@ -103,6 +103,7 @@
           <div class="input-group"><label>Cost ($)</label><input type="number" class="input-field" name="cost" id="pCost" placeholder="0.00" step="0.01"></div>
           <div class="input-group"><label>Stock Quantity</label><input type="number" class="input-field" name="stock" id="pStock" placeholder="0"></div>
           <div class="input-group"><label>SKU</label><input type="text" class="input-field" name="sku" id="pSku" placeholder="e.g. COF-025" required></div>
+          <div class="input-group"><label>Barcode <span style="font-weight:400;color:var(--fg-dim);">(optional)</span></label><input type="text" class="input-field" name="barcode" id="pBarcode" placeholder="e.g. 012345678905"></div>
         </div>
         <div class="input-group" style="margin-top:16px;"><label>Description</label><textarea class="input-field" name="description" id="pDesc" rows="2" placeholder="Brief description..."></textarea></div>
       </div>
@@ -128,6 +129,7 @@ function openProductModal(product) {
   document.getElementById('pCost').value = product ? product.cost : '';
   document.getElementById('pStock').value = product ? product.stock : '';
   document.getElementById('pSku').value = product ? product.sku : '';
+  document.getElementById('pBarcode').value = product ? (product.barcode ?? '') : '';
   document.getElementById('pDesc').value = product ? (product.description ?? '') : '';
   openModal('productModal');
 }

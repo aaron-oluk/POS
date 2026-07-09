@@ -39,7 +39,7 @@ class ProductSeeder extends Seeder
 
         $categoryIds = Category::pluck('id', 'name');
 
-        foreach ($products as [$name, $category, $price, $cost, $stock, $sku, $icon, $desc]) {
+        foreach ($products as $i => [$name, $category, $price, $cost, $stock, $sku, $icon, $desc]) {
             Product::create([
                 'category_id' => $categoryIds[$category],
                 'name' => $name,
@@ -47,6 +47,7 @@ class ProductSeeder extends Seeder
                 'cost' => $cost,
                 'stock' => $stock,
                 'sku' => $sku,
+                'barcode' => '08960000'.str_pad((string) ($i + 1), 5, '0', STR_PAD_LEFT),
                 'icon' => $icon,
                 'description' => $desc,
             ]);

@@ -7,6 +7,15 @@ let discountType = 'percent';
 let discountValue = 0;
 let currentTip = 0;
 let currentPosCategory = 'All';
+let currentCustomizeProduct = null;
+
+// A cart line is keyed by product + the sorted set of chosen modifier option
+// ids, so e.g. "Latte, Oat Milk" and "Latte, Whole Milk" stay separate lines
+// even though they're the same product.
+function cartKey(productId, modifiers) {
+    const ids = modifiers.map((m) => m.id).sort((a, b) => a - b).join(',');
+    return `${productId}:${ids}`;
+}
 
 // ===== CART PERSISTENCE =====
 // The cart is plain in-memory JS state, which would normally be wiped out
@@ -17,7 +26,7 @@ let currentPosCategory = 'All';
 function saveCartState() {
     try {
         localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({
-            items: cart.map((c) => ({ productId: c.product.id, qty: c.qty })),
+            items: cart.map((c) => ({ productId: c.product.id, qty: c.qty, modifierOptionIds: c.modifiers.map((m) => m.id) })),
             discountType,
             discountValue,
             customerId: document.getElementById('posCustomer')?.value || '',
@@ -48,7 +57,16 @@ function restoreCartState() {
     (saved.items || []).forEach((item) => {
         const product = products.find((p) => p.id === item.productId);
         if (!product || product.stock <= 0) return;
-        restoredItems.push({ product, qty: Math.min(item.qty, product.stock) });
+        const allOptions = (product.modifierGroups || []).flatMap((g) => g.options);
+        const modifiers = (item.modifierOptionIds || []).map((id) => allOptions.find((o) => o.id === id)).filter(Boolean);
+        const unitPrice = product.price + modifiers.reduce((s, m) => s + m.price_delta, 0);
+        restoredItems.push({
+            key: cartKey(product.id, modifiers),
+            product,
+            qty: Math.min(item.qty, product.stock),
+            modifiers,
+            unitPrice,
+        });
     });
     cart = restoredItems;
 
@@ -95,7 +113,7 @@ function renderPosGrid() {
     document.getElementById('posGrid').innerHTML = filtered.map((p) => `
         <div class="pos-item" data-id="${p.id}" title="${p.desc ?? ''}">
             <div class="pos-item-img">${p.icon}</div>
-            <div class="pos-item-name">${p.name}</div>
+            <div class="pos-item-name">${p.name}${p.modifierGroups && p.modifierGroups.length ? ' <i class="bx bx-slider-alt" style="font-size:10px;color:var(--fg-dim);" data-tooltip="Customizable"></i>' : ''}</div>
             <div class="pos-item-price">${window.formatMoney(p.price)}</div>
             <div class="pos-item-stock">${p.stock} in stock</div>
         </div>
@@ -108,35 +126,84 @@ function renderPosGrid() {
 function addToCart(productId) {
     const p = products.find((x) => x.id === productId);
     if (!p) return;
-    const existing = cart.find((c) => c.product.id === productId);
-    if (existing) {
-        if (existing.qty >= p.stock) {
-            showToast(`${p.name} is out of stock`, 'warning');
-            return;
-        }
-        existing.qty++;
-    } else {
-        cart.push({ product: p, qty: 1 });
+    if (p.stock <= 0) {
+        showToast(`${p.name} is out of stock`, 'warning');
+        return;
     }
-    renderCart();
-    showToast(`Added ${p.name}`, 'success');
+    if (p.modifierGroups && p.modifierGroups.length) {
+        openCustomizeModal(p);
+    } else {
+        addToCartWithModifiers(p, []);
+    }
 }
 
-function updateCartQty(productId, delta) {
-    const item = cart.find((c) => c.product.id === productId);
+function addToCartWithModifiers(product, modifiers) {
+    const key = cartKey(product.id, modifiers);
+    const existingProductQty = cart.filter((c) => c.product.id === product.id).reduce((s, c) => s + c.qty, 0);
+    if (existingProductQty >= product.stock) {
+        showToast(`${product.name} is out of stock`, 'warning');
+        return;
+    }
+    const existingLine = cart.find((c) => c.key === key);
+    if (existingLine) {
+        existingLine.qty++;
+    } else {
+        const unitPrice = product.price + modifiers.reduce((s, m) => s + m.price_delta, 0);
+        cart.push({ key, product, qty: 1, modifiers, unitPrice });
+    }
+    renderCart();
+    showToast(`Added ${product.name}`, 'success');
+}
+
+function openCustomizeModal(product) {
+    currentCustomizeProduct = product;
+    document.getElementById('customizeModalTitle').textContent = `Customize ${product.icon} ${product.name}`;
+    document.getElementById('customizeModalBody').innerHTML = product.modifierGroups.map((g) => `
+        <div style="margin-bottom:14px;">
+            <label style="font-size:12px;font-weight:600;color:var(--fg-muted);display:block;margin-bottom:6px;">${g.name}${g.multiple ? '' : ' (choose one)'}</label>
+            ${g.options.map((o, i) => `
+                <label style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:13px;cursor:pointer;">
+                    <span style="display:flex;align-items:center;gap:8px;">
+                        <input type="${g.multiple ? 'checkbox' : 'radio'}" name="mg-${g.id}" value="${o.id}" ${(!g.multiple && i === 0) ? 'checked' : ''}>
+                        ${o.name}
+                    </span>
+                    <span style="color:var(--fg-muted);">${o.price_delta !== 0 ? (o.price_delta > 0 ? '+' : '') + window.formatMoney(o.price_delta) : ''}</span>
+                </label>
+            `).join('')}
+        </div>
+    `).join('');
+    openModal('customizeModal');
+}
+
+document.getElementById('customizeAddBtn').addEventListener('click', () => {
+    if (!currentCustomizeProduct) return;
+    const modifiers = [];
+    currentCustomizeProduct.modifierGroups.forEach((g) => {
+        document.querySelectorAll(`input[name="mg-${g.id}"]:checked`).forEach((input) => {
+            const opt = g.options.find((o) => o.id === parseInt(input.value, 10));
+            if (opt) modifiers.push(opt);
+        });
+    });
+    addToCartWithModifiers(currentCustomizeProduct, modifiers);
+    closeModal('customizeModal');
+});
+
+function updateCartQty(key, delta) {
+    const item = cart.find((c) => c.key === key);
     if (!item) return;
+    const otherQty = cart.filter((c) => c.product.id === item.product.id && c.key !== key).reduce((s, c) => s + c.qty, 0);
     item.qty += delta;
     if (item.qty <= 0) {
-        cart = cart.filter((c) => c.product.id !== productId);
-    } else if (item.qty > item.product.stock) {
-        item.qty = item.product.stock;
+        cart = cart.filter((c) => c.key !== key);
+    } else if (item.qty + otherQty > item.product.stock) {
+        item.qty = Math.max(1, item.product.stock - otherQty);
         showToast('Max stock reached', 'warning');
     }
     renderCart();
 }
 
-function removeFromCart(productId) {
-    cart = cart.filter((c) => c.product.id !== productId);
+function removeFromCart(key) {
+    cart = cart.filter((c) => c.key !== key);
     renderCart();
 }
 
@@ -151,7 +218,7 @@ function clearCart() {
 }
 
 function getCartTotals() {
-    const subtotal = cart.reduce((s, c) => s + c.product.price * c.qty, 0);
+    const subtotal = cart.reduce((s, c) => s + c.unitPrice * c.qty, 0);
     let disc = discountType === 'percent' ? subtotal * (discountValue / 100) : discountValue;
     disc = Math.min(disc, subtotal);
     const afterDisc = subtotal - disc;
@@ -170,22 +237,23 @@ function renderCart() {
             <div class="pos-cart-item">
                 <div class="pos-cart-item-info">
                     <div class="pos-cart-item-name">${c.product.icon} ${c.product.name}</div>
-                    <div class="pos-cart-item-price">${window.formatMoney(c.product.price)} each</div>
+                    ${c.modifiers.length ? `<div style="font-size:10px;color:var(--fg-dim);">${c.modifiers.map((m) => m.name).join(', ')}</div>` : ''}
+                    <div class="pos-cart-item-price">${window.formatMoney(c.unitPrice)} each</div>
                 </div>
                 <div class="pos-cart-qty">
-                    <button data-id="${c.product.id}" data-delta="-1" aria-label="Decrease quantity" data-tooltip="Decrease quantity"><i class="bx bx-minus" style="font-size:10px;"></i></button>
+                    <button data-key="${c.key}" data-delta="-1" aria-label="Decrease quantity" data-tooltip="Decrease quantity"><i class="bx bx-minus" style="font-size:10px;"></i></button>
                     <span>${c.qty}</span>
-                    <button data-id="${c.product.id}" data-delta="1" aria-label="Increase quantity" data-tooltip="Increase quantity"><i class="bx bx-plus" style="font-size:10px;"></i></button>
+                    <button data-key="${c.key}" data-delta="1" aria-label="Increase quantity" data-tooltip="Increase quantity"><i class="bx bx-plus" style="font-size:10px;"></i></button>
                 </div>
-                <div class="pos-cart-item-total">${window.formatMoney(c.product.price * c.qty)}</div>
-                <button class="pos-cart-item-remove" data-remove="${c.product.id}" aria-label="Remove from cart" data-tooltip="Remove from cart"><i class="bx bx-x"></i></button>
+                <div class="pos-cart-item-total">${window.formatMoney(c.unitPrice * c.qty)}</div>
+                <button class="pos-cart-item-remove" data-remove-key="${c.key}" aria-label="Remove from cart" data-tooltip="Remove from cart"><i class="bx bx-x"></i></button>
             </div>
         `).join('');
         container.querySelectorAll('[data-delta]').forEach((btn) => {
-            btn.addEventListener('click', () => updateCartQty(parseInt(btn.dataset.id, 10), parseInt(btn.dataset.delta, 10)));
+            btn.addEventListener('click', () => updateCartQty(btn.dataset.key, parseInt(btn.dataset.delta, 10)));
         });
-        container.querySelectorAll('[data-remove]').forEach((btn) => {
-            btn.addEventListener('click', () => removeFromCart(parseInt(btn.dataset.remove, 10)));
+        container.querySelectorAll('[data-remove-key]').forEach((btn) => {
+            btn.addEventListener('click', () => removeFromCart(btn.dataset.removeKey));
         });
     }
     const t = getCartTotals();
@@ -198,6 +266,21 @@ function renderCart() {
 }
 
 document.getElementById('posSearch').addEventListener('input', renderPosGrid);
+
+// Barcode scanners behave like a fast keyboard typing the code followed by Enter.
+document.getElementById('posBarcode')?.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const code = e.target.value.trim();
+    e.target.value = '';
+    if (!code) return;
+    const product = products.find((p) => p.barcode && p.barcode === code);
+    if (!product) {
+        showToast(`No product found for barcode ${code}`, 'error');
+        return;
+    }
+    addToCart(product.id);
+});
 document.getElementById('holdOrderBtn').addEventListener('click', () => {
     if (cart.length === 0) { showToast('Cart is empty', 'warning'); return; }
     showToast('Order held successfully. You can start a new order.', 'info');
@@ -450,7 +533,7 @@ document.getElementById('processPayBtn').addEventListener('click', async () => {
     btn.disabled = true;
     try {
         const payload = {
-            items: cart.map((c) => ({ product_id: c.product.id, qty: c.qty })),
+            items: cart.map((c) => ({ product_id: c.product.id, qty: c.qty, modifier_option_ids: c.modifiers.map((m) => m.id) })),
             discount_type: discountValue > 0 ? discountType : null,
             discount_value: discountValue,
             tip_percent: currentTip,
@@ -481,7 +564,7 @@ document.getElementById('processPayBtn').addEventListener('click', async () => {
 function showReceipt(order) {
     const dateStr = new Date(order.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     const itemsHtml = order.items.map((it) => `
-        <div class="receipt-row"><span>${it.name} x${it.qty}</span><span>${window.formatMoney(it.total)}</span></div>
+        <div class="receipt-row"><span>${it.name}${it.modifiers && it.modifiers.length ? ' ('+it.modifiers.join(', ')+')' : ''} x${it.qty}</span><span>${window.formatMoney(it.total)}</span></div>
     `).join('');
     const paymentHtml = order.payments.length > 1
         ? order.payments.map((p) => `<div class="receipt-row"><span>${p.method}</span><span>${window.formatMoney(p.amount)}</span></div>`).join('')

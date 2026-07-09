@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             SettingSeeder::class,
             OrderSeeder::class,
+            SupplierSeeder::class,
+            ModifierGroupSeeder::class,
         ]);
     }
 }

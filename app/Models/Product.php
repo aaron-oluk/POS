@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     protected $fillable = [
-        'category_id', 'name', 'sku', 'price', 'cost', 'stock', 'icon', 'description',
+        'category_id', 'name', 'sku', 'barcode', 'price', 'cost', 'stock', 'icon', 'description',
     ];
 
     protected function casts(): array
@@ -26,6 +26,16 @@ class Product extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function modifierGroups()
+    {
+        return $this->belongsToMany(ModifierGroup::class, 'modifier_group_product');
+    }
+
+    public function stockAdjustments()
+    {
+        return $this->hasMany(StockAdjustment::class);
     }
 
     public function getStockStatusAttribute(): string
