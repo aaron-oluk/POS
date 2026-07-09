@@ -86,7 +86,10 @@ class CurrencyConverter
     public static function convertPurchases(float $ratio, int $decimals = 2): void
     {
         Purchase::query()->each(function (Purchase $purchase) use ($ratio, $decimals) {
-            $purchase->update(['total' => round((float) $purchase->total * $ratio, $decimals)]);
+            $purchase->update([
+                'total' => round((float) $purchase->total * $ratio, $decimals),
+                'amount_paid' => round((float) $purchase->amount_paid * $ratio, $decimals),
+            ]);
         });
 
         PurchaseItem::query()->each(function (PurchaseItem $item) use ($ratio, $decimals) {

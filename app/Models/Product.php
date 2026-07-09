@@ -18,6 +18,25 @@ class Product extends Model
         ];
     }
 
+    /**
+     * Stock can never go negative. Checkout and stock-adjustment flows
+     * already validate this with a friendly error before they touch the
+     * database, but `increment`/`decrement` bypass `saving` (they only fire
+     * `updating`) — guarding both events here is the last line of defense
+     * against any code path, present or future, persisting a negative count.
+     */
+    protected static function booted(): void
+    {
+        $guardNonNegativeStock = function (self $product) {
+            if ($product->stock < 0) {
+                throw new \RuntimeException("Product #{$product->id} stock cannot go negative (attempted {$product->stock}).");
+            }
+        };
+
+        static::saving($guardNonNegativeStock);
+        static::updating($guardNonNegativeStock);
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class);

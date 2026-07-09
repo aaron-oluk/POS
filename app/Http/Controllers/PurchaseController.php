@@ -16,7 +16,7 @@ class PurchaseController extends Controller
     public function index(): View
     {
         $purchases = Purchase::with('supplier', 'user', 'items')
-            ->latest()
+            ->latest('supply_date')
             ->paginate(15);
 
         return view('purchases.index', [
@@ -25,7 +25,8 @@ class PurchaseController extends Controller
             'products' => Product::orderBy('name')->get(['id', 'name', 'icon', 'cost']),
             'purchaseCount' => Purchase::count(),
             'totalSpend' => Purchase::sum('total'),
-            'thisMonthSpend' => Purchase::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->sum('total'),
+            'totalPaid' => Purchase::sum('amount_paid'),
+            'thisMonthSpend' => Purchase::whereMonth('supply_date', now()->month)->whereYear('supply_date', now()->year)->sum('total'),
         ]);
     }
 
@@ -34,6 +35,8 @@ class PurchaseController extends Controller
         $data = $request->validate([
             'supplier_id' => ['required', 'exists:suppliers,id'],
             'reference_no' => ['nullable', 'string', 'max:255'],
+            'supply_date' => ['required', 'date', 'before_or_equal:today'],
+            'amount_paid' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'exists:products,id'],
@@ -41,7 +44,9 @@ class PurchaseController extends Controller
             'items.*.unit_cost' => ['required', 'numeric', 'min:0'],
         ]);
 
-        DB::transaction(function () use ($data, $request) {
+        $error = null;
+
+        DB::transaction(function () use ($data, $request, &$error) {
             $products = Product::whereIn('id', collect($data['items'])->pluck('product_id'))
                 ->lockForUpdate()
                 ->get()
@@ -51,13 +56,30 @@ class PurchaseController extends Controller
             foreach ($data['items'] as $item) {
                 $total += $item['quantity'] * $item['unit_cost'];
             }
+            $total = round($total, 2);
+
+            // Defaulting the amount paid to the full total preserves the
+            // "paid in full at delivery" behavior when the field is left
+            // blank; explicitly entering a smaller figure records the rest
+            // as owed to the supplier (bought on credit).
+            $amountPaid = array_key_exists('amount_paid', $data) && $data['amount_paid'] !== null
+                ? round((float) $data['amount_paid'], 2)
+                : $total;
+
+            if ($amountPaid > $total + 0.01) {
+                $error = 'Amount paid cannot exceed the purchase total.';
+
+                return;
+            }
 
             $purchase = Purchase::create([
                 'supplier_id' => $data['supplier_id'],
                 'user_id' => $request->user()->id,
                 'reference_no' => $data['reference_no'] ?? null,
+                'supply_date' => $data['supply_date'],
                 'notes' => $data['notes'] ?? null,
-                'total' => round($total, 2),
+                'total' => $total,
+                'amount_paid' => $amountPaid,
             ]);
 
             foreach ($data['items'] as $item) {
@@ -77,6 +99,25 @@ class PurchaseController extends Controller
             }
         });
 
+        if ($error) {
+            return back()->with('error', $error);
+        }
+
         return back()->with('success', 'Purchase recorded and stock updated.');
+    }
+
+    public function pay(Request $request, Purchase $purchase): RedirectResponse
+    {
+        $data = $request->validate([
+            'amount' => ['required', 'numeric', 'min:0.01'],
+        ]);
+
+        if ($data['amount'] > $purchase->balance_due + 0.01) {
+            return back()->with('error', 'Payment exceeds the outstanding balance owed to this supplier.');
+        }
+
+        $purchase->update(['amount_paid' => round((float) $purchase->amount_paid + $data['amount'], 2)]);
+
+        return back()->with('success', 'Supplier payment recorded.');
     }
 }

@@ -14,11 +14,12 @@
   </div>
 </div>
 
+@php $totalOutstanding = max(0, $totalSpend - $totalPaid); @endphp
 <div class="grid grid-4" style="margin-bottom:20px;">
   <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--accent-dim);color:var(--accent);width:40px;height:40px;font-size:15px;"><i class="bx bxs-truck"></i></div><div><div class="stat-label">Total Purchases</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $purchaseCount }}</div></div></div>
-  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--info-dim);color:var(--info);width:40px;height:40px;font-size:15px;"><i class="bx bxs-group"></i></div><div><div class="stat-label">Suppliers</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $suppliers->count() }}</div></div></div>
   <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--warning-dim);color:var(--warning);width:40px;height:40px;font-size:15px;"><i class="bx bxs-calendar"></i></div><div><div class="stat-label">Spend This Month</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">@money($thisMonthSpend)</div></div></div>
-  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--success-dim);color:var(--success);width:40px;height:40px;font-size:15px;"><i class="bx bxs-dollar-circle"></i></div><div><div class="stat-label">Total Spend</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">@money($totalSpend)</div></div></div>
+  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--success-dim);color:var(--success);width:40px;height:40px;font-size:15px;"><i class="bx bxs-dollar-circle"></i></div><div><div class="stat-label">Total Paid to Suppliers</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">@money($totalPaid)</div></div></div>
+  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--danger-dim);color:var(--danger);width:40px;height:40px;font-size:15px;"><i class="bx bxs-error-circle"></i></div><div><div class="stat-label">Outstanding Balance</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;{{ $totalOutstanding > 0 ? 'color:var(--danger);' : '' }}">@money($totalOutstanding)</div></div></div>
 </div>
 
 <div class="tabs">
@@ -30,19 +31,31 @@
   <div class="card">
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Reference</th><th>Supplier</th><th>Items</th><th>Total</th><th>Recorded By</th><th>Date</th></tr></thead>
+        <thead><tr><th>Reference</th><th>Supplier</th><th>Items</th><th>Total</th><th>Balance Owed</th><th>Status</th><th>Supply Date</th><th>Recorded By</th><th>Actions</th></tr></thead>
         <tbody>
           @forelse ($purchases as $p)
+          @php $poNumber = $p->reference_no ?? 'PO-'.str_pad($p->id, 4, '0', STR_PAD_LEFT); @endphp
           <tr>
-            <td style="font-weight:600;">{{ $p->reference_no ?? 'PO-'.str_pad($p->id, 4, '0', STR_PAD_LEFT) }}</td>
+            <td style="font-weight:600;">{{ $poNumber }}</td>
             <td>{{ $p->supplier->name }}</td>
             <td>{{ $p->items->sum('quantity') }} units ({{ $p->items->count() }} products)</td>
             <td style="font-family:'Figtree';font-weight:600;">@money($p->total)</td>
+            <td style="font-family:'Figtree';font-weight:600;{{ $p->balance_due > 0 ? 'color:var(--danger);' : '' }}">@money($p->balance_due)</td>
+            <td>
+              @if ($p->payment_status === 'paid')<span class="badge badge-success">Paid</span>
+              @elseif ($p->payment_status === 'partial')<span class="badge badge-warning">Partial</span>
+              @else<span class="badge badge-danger">Unpaid</span>@endif
+            </td>
+            <td style="color:var(--fg-muted);">{{ $p->supply_date?->format('M j, Y') ?? '—' }}</td>
             <td>{{ $p->user->name }}</td>
-            <td style="color:var(--fg-muted);">{{ $p->created_at->format('M j, Y g:i A') }}</td>
+            <td>
+              @if ($p->balance_due > 0)
+              <button class="btn btn-secondary btn-sm" data-pay-id="{{ $p->id }}" data-pay-ref="{{ $poNumber }}" data-pay-balance="{{ (float) $p->balance_due }}" onclick="openPayModal(this.dataset)"><i class="bx bx-money"></i> Record Payment</button>
+              @endif
+            </td>
           </tr>
           @empty
-          <tr><td colspan="6" style="text-align:center;color:var(--fg-muted);">No purchases recorded yet</td></tr>
+          <tr><td colspan="9" style="text-align:center;color:var(--fg-muted);">No purchases recorded yet</td></tr>
           @endforelse
         </tbody>
       </table>
@@ -104,6 +117,11 @@
           </div>
           <div class="input-group"><label>Reference No. <span style="font-weight:400;color:var(--fg-dim);">(optional)</span></label><input type="text" class="input-field" name="reference_no" placeholder="e.g. INV-1042"></div>
         </div>
+        <div class="grid grid-2" style="gap:16px;margin-bottom:12px;">
+          <div class="input-group"><label>Date Supplied</label><input type="date" class="input-field" name="supply_date" id="puSupplyDate" max="{{ now()->format('Y-m-d') }}" required></div>
+          <div class="input-group"><label>Amount Paid Now <span style="font-weight:400;color:var(--fg-dim);">(optional)</span></label><input type="number" class="input-field" name="amount_paid" id="puAmountPaid" step="0.01" min="0" placeholder="Defaults to full total"></div>
+        </div>
+        <div style="font-size:11px;color:var(--fg-dim);margin:-8px 0 12px;">Leave "Amount Paid" blank to record the purchase as paid in full. Enter a smaller amount (or 0) if the supplier is extending credit — the remaining balance can be settled later from the purchase history table.</div>
         <div class="input-group" style="margin-bottom:12px;"><label>Notes</label><textarea class="input-field" name="notes" rows="2"></textarea></div>
 
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
@@ -146,6 +164,29 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeModal('supplierModal')">Cancel</button>
         <button type="submit" class="btn btn-primary"><i class="bx bx-check"></i> Save Supplier</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="payModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <h3 id="payModalTitle">Record Payment</h3>
+      <button class="modal-close" onclick="closeModal('payModal')" aria-label="Close" data-tooltip="Close"><i class="bx bx-x"></i></button>
+    </div>
+    <form id="payForm" method="POST">
+      @csrf @method('PUT')
+      <div class="modal-body">
+        <div class="card" style="text-align:center;margin-bottom:16px;">
+          <div style="font-size:12px;color:var(--fg-muted);margin-bottom:4px;">Balance Owed</div>
+          <div style="font-family:'Figtree';font-size:22px;font-weight:700;color:var(--danger);" id="payBalanceDisplay">$0.00</div>
+        </div>
+        <div class="input-group"><label>Amount to Pay</label><input type="number" class="input-field" name="amount" id="payAmountInput" step="0.01" min="0.01" required autofocus></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('payModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary"><i class="bx bx-check"></i> Record Payment</button>
       </div>
     </form>
   </div>
@@ -222,11 +263,23 @@ document.getElementById('addPurchaseItemBtn').addEventListener('click', addPurch
 
 function openPurchaseModal() {
   document.getElementById('purchaseForm').reset();
+  document.getElementById('puSupplyDate').value = new Date().toISOString().slice(0, 10);
   document.getElementById('purchaseItemRows').innerHTML = '';
   purchaseRowCount = 0;
   addPurchaseItemRow();
   recalcPurchaseTotal();
   openModal('purchaseModal');
+}
+
+function openPayModal(dataset) {
+  const balance = parseFloat(dataset.payBalance);
+  document.getElementById('payModalTitle').textContent = `Record Payment — ${dataset.payRef}`;
+  document.getElementById('payForm').action = `/purchases/${dataset.payId}/pay`;
+  document.getElementById('payBalanceDisplay').textContent = window.formatMoney(balance);
+  const amountInput = document.getElementById('payAmountInput');
+  amountInput.max = balance;
+  amountInput.value = balance;
+  openModal('payModal');
 }
 
 function openSupplierModal(supplier) {

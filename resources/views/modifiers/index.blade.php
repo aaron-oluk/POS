@@ -20,7 +20,7 @@
         <span class="badge badge-muted">{{ $g->multiple ? 'Multiple choice' : 'Single choice' }}</span>
       </div>
       <div style="display:flex;gap:4px;">
-        <button class="btn btn-secondary btn-sm btn-icon" aria-label="Edit" data-tooltip="Edit" onclick='openModifierGroupModal(@json($g->load("options","products")))'><i class="bx bxs-pencil" style="font-size:11px;"></i></button>
+        <button class="btn btn-secondary btn-sm btn-icon" aria-label="Edit" data-tooltip="Edit" onclick='openModifierGroupModal(@json($g))'><i class="bx bxs-pencil" style="font-size:11px;"></i></button>
         <form method="POST" action="{{ route('modifiers.destroy', $g) }}" data-confirm="Delete the {{ $g->name }} modifier group?" data-confirm-title="Delete Modifier Group" data-confirm-label="Delete">
           @csrf @method('DELETE')
           <button type="submit" class="btn btn-danger btn-sm btn-icon" aria-label="Delete" data-tooltip="Delete"><i class="bx bxs-trash" style="font-size:11px;"></i></button>
