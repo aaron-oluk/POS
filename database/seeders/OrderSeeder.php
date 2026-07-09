@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\OrderPayment;
 use App\Models\Product;
 use App\Models\Setting;
 use App\Models\User;
@@ -51,6 +52,21 @@ class OrderSeeder extends Seeder
                 ->subDays(intdiv($i, 3))
                 ->setTime(rand(8, 19), rand(0, 59));
 
+            // ~1 in 6 orders is split across two payment methods, so the split-payment
+            // feature (and its reporting) has real demo data from the very first run.
+            $isSplit = $status === 'completed' && rand(1, 6) === 1;
+            if ($isSplit) {
+                $methodA = $paymentMethods[array_rand($paymentMethods)];
+                do {
+                    $methodB = $paymentMethods[array_rand($paymentMethods)];
+                } while ($methodB === $methodA);
+                $amountA = round($total * (rand(30, 70) / 100), 2);
+                $amountB = round($total - $amountA, 2);
+                $paymentBreakdown = [$methodA => $amountA, $methodB => $amountB];
+            } else {
+                $paymentBreakdown = [$paymentMethods[array_rand($paymentMethods)] => $total];
+            }
+
             $order = Order::create([
                 'customer_id' => $customer->id,
                 'user_id' => $cashier->id,
@@ -61,11 +77,21 @@ class OrderSeeder extends Seeder
                 'tax' => $tax,
                 'tip' => $tip,
                 'total' => $total,
-                'payment_method' => $paymentMethods[array_rand($paymentMethods)],
+                'payment_method' => $isSplit ? 'split' : array_key_first($paymentBreakdown),
                 'status' => $status,
                 'created_at' => $date,
                 'updated_at' => $date,
             ]);
+
+            foreach ($paymentBreakdown as $method => $amount) {
+                OrderPayment::create([
+                    'order_id' => $order->id,
+                    'method' => $method,
+                    'amount' => $amount,
+                    'created_at' => $date,
+                    'updated_at' => $date,
+                ]);
+            }
 
             foreach ($itemLines as $line) {
                 OrderItem::create([

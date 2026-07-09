@@ -95,12 +95,18 @@ document.addEventListener('DOMContentLoaded', () => {
     },
   });
 
-  const payLabels = @json($paymentCounts->keys()->map(fn($k) => ['cash'=>'Cash','card'=>'Card','mobile'=>'Mobile Pay'][$k] ?? $k));
-  const payData = @json($paymentCounts->values());
+  const payLabels = @json($paymentTotals->keys()->map(fn($k) => ['cash'=>'Cash','card'=>'Card','mobile'=>'Mobile Pay'][$k] ?? $k));
+  const payData = @json($paymentTotals->values());
   new Chart(document.getElementById('paymentChart'), {
     type: 'pie',
     data: { labels: payLabels, datasets: [{ data: payData, backgroundColor: ['#e8a838', '#34d399', '#60a5fa'], borderWidth: 0, hoverOffset: 8 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 12 }, usePointStyle: true, pointStyle: 'circle', padding: 16 } } } },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: textColor, font: { size: 12 }, usePointStyle: true, pointStyle: 'circle', padding: 16 } },
+        tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${window.formatMoney(ctx.parsed)}` } },
+      },
+    },
   });
 });
 </script>

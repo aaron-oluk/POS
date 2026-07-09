@@ -38,6 +38,11 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function payments()
+    {
+        return $this->hasMany(OrderPayment::class);
+    }
+
     public function getOrderNumberAttribute(): string
     {
         return 'ORD-'.str_pad((string) (999 + $this->id), 4, '0', STR_PAD_LEFT);
@@ -45,6 +50,19 @@ class Order extends Model
 
     public static function paymentLabel(string $method): string
     {
-        return ['cash' => 'Cash', 'card' => 'Card', 'mobile' => 'Mobile Pay'][$method] ?? ucfirst($method);
+        return ['cash' => 'Cash', 'card' => 'Card', 'mobile' => 'Mobile Pay', 'split' => 'Split'][$method] ?? ucfirst($method);
+    }
+
+    /**
+     * "Cash" / "Card" for a single method, or "Cash + Card" for a split order.
+     * Relies on $payments already being eager-loaded to avoid N+1 queries.
+     */
+    public function getPaymentSummaryAttribute(): string
+    {
+        if ($this->payment_method !== 'split') {
+            return static::paymentLabel($this->payment_method);
+        }
+
+        return $this->payments->pluck('method')->map(fn ($m) => static::paymentLabel($m))->implode(' + ');
     }
 }

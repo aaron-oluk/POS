@@ -68,6 +68,9 @@
         <button type="button" class="pay-method" data-method="mobile"><i class="bx bxs-mobile"></i><span>Mobile</span></button>
         @endif
       </div>
+      @if ($settings->split_payment_enabled)
+      <div style="font-size:11px;color:var(--fg-dim);margin:-0.5rem 0 0.75rem;">Select more than one method to split this payment.</div>
+      @endif
       <div id="cashSection">
         <div class="input-group" style="margin-bottom:12px;">
           <label>Amount Received</label>
@@ -77,6 +80,13 @@
         <div class="card" style="text-align:center;">
           <div style="font-size:12px;color:var(--fg-muted);margin-bottom:4px;">Change Due</div>
           <div style="font-family:'Figtree';font-size:28px;font-weight:700;color:var(--success);" id="changeDue">$0.00</div>
+        </div>
+      </div>
+      <div id="splitSection" style="display:none;">
+        <div id="splitRows"></div>
+        <div class="card" style="text-align:center;">
+          <div style="font-size:12px;color:var(--fg-muted);margin-bottom:4px;" id="splitStatusLabel">Remaining</div>
+          <div style="font-family:'Figtree';font-size:28px;font-weight:700;" id="splitStatusAmount">$0.00</div>
         </div>
       </div>
       @if ($settings->prompt_tips)

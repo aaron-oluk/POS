@@ -30,7 +30,7 @@
           <td>{{ $o->customer?->full_name ?? 'Walk-in' }}</td>
           <td>{{ $o->items()->count() }} item{{ $o->items()->count() > 1 ? 's' : '' }}</td>
           <td style="font-family:'Figtree';font-weight:600;">@money($o->total)</td>
-          <td><span class="badge badge-muted">{{ \App\Models\Order::paymentLabel($o->payment_method) }}</span></td>
+          <td><span class="badge {{ $o->payment_method === 'split' ? 'badge-info' : 'badge-muted' }}" @if($o->payment_method === 'split') data-tooltip="{{ $o->payments->map(fn($p) => \App\Models\Order::paymentLabel($p->method).' '.\App\Models\Setting::current()->money($p->amount))->implode(', ') }}" @endif>{{ $o->payment_summary }}</span></td>
           <td><span class="badge badge-{{ ['completed'=>'success','pending'=>'warning','refunded'=>'danger','cancelled'=>'muted'][$o->status] }}">{{ ucfirst($o->status) }}</span></td>
           <td style="color:var(--fg-muted);font-size:12px;">{{ $o->created_at->format('M j, g:i A') }}</td>
           <td>
@@ -85,7 +85,7 @@ async function showOrderDetail(id) {
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
         <div class="card" style="padding:12px;"><div style="font-size:11px;color:var(--fg-muted);">Customer</div><div style="font-weight:600;margin-top:2px;">${o.customer}</div></div>
-        <div class="card" style="padding:12px;"><div style="font-size:11px;color:var(--fg-muted);">Payment</div><div style="font-weight:600;margin-top:2px;">${o.payment_method}</div></div>
+        <div class="card" style="padding:12px;"><div style="font-size:11px;color:var(--fg-muted);">Payment</div><div style="font-weight:600;margin-top:2px;">${o.payment_method}</div>${o.payments.length > 1 ? `<div style="font-size:11px;color:var(--fg-muted);margin-top:4px;">${o.payments.map((p) => `${p.method}: ${window.formatMoney(p.amount)}`).join(' &middot; ')}</div>` : ''}</div>
       </div>
       <h4 style="font-size:13px;margin-bottom:8px;">Items</h4>
       <div class="table-wrap"><table>

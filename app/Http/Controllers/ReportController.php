@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\OrderPayment;
 use App\Models\Product;
 use App\Models\Setting;
 use App\Models\User;
@@ -62,7 +63,15 @@ class ReportController extends Controller
         $hourlyLabels = $hourRange->map(fn ($h) => Carbon::createFromTime($h)->format('gA'));
         $hourlyData = $hourRange->map(fn ($h) => round($hourlyTotals[$h] ?? 0, 2));
 
-        $paymentCounts = (clone $orders)->get()->groupBy('payment_method')->map->count();
+        // Sums each method's *actual amount collected*, not order counts — a split
+        // order's cash/card portions each count toward their own method here.
+        $paymentTotals = OrderPayment::query()
+            ->join('orders', 'orders.id', '=', 'order_payments.order_id')
+            ->where('orders.created_at', '>=', $from)
+            ->where('orders.status', '!=', 'cancelled')
+            ->selectRaw('order_payments.method, SUM(order_payments.amount) as total')
+            ->groupBy('order_payments.method')
+            ->pluck('total', 'method');
 
         $staffPerformance = User::withSum(['orders' => fn ($q) => $q->where('created_at', '>=', $from)->where('status', '!=', 'cancelled')], 'total')
             ->withCount(['orders' => fn ($q) => $q->where('created_at', '>=', $from)->where('status', '!=', 'cancelled')])
@@ -101,7 +110,7 @@ class ReportController extends Controller
             'totalTips' => $totalTips,
             'hourlyLabels' => $hourlyLabels,
             'hourlyData' => $hourlyData,
-            'paymentCounts' => $paymentCounts,
+            'paymentTotals' => $paymentTotals,
             'staffPerformance' => $staffPerformance,
             'lowStock' => $lowStock,
             'topProducts' => $topProducts,

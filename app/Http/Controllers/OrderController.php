@@ -15,7 +15,7 @@ class OrderController extends Controller
         $status = $request->get('status', 'all');
         $search = $request->get('q');
 
-        $orders = Order::with('customer')
+        $orders = Order::with('customer', 'payments')
             ->when($status !== 'all', fn ($q) => $q->where('status', $status))
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($q) use ($search) {
@@ -36,7 +36,7 @@ class OrderController extends Controller
 
     public function show(Order $order): JsonResponse
     {
-        $order->load('items', 'customer', 'cashier');
+        $order->load('items', 'customer', 'cashier', 'payments');
 
         return response()->json([
             'order_number' => $order->order_number,
@@ -44,7 +44,11 @@ class OrderController extends Controller
             'created_at' => $order->created_at->toIso8601String(),
             'customer' => $order->customer?->full_name ?? 'Walk-in Customer',
             'cashier' => $order->cashier->name,
-            'payment_method' => Order::paymentLabel($order->payment_method),
+            'payment_method' => $order->payment_summary,
+            'payments' => $order->payments->map(fn ($p) => [
+                'method' => Order::paymentLabel($p->method),
+                'amount' => (float) $p->amount,
+            ]),
             'items' => $order->items->map(fn ($i) => [
                 'name' => $i->product_name, 'icon' => $i->product_icon,
                 'qty' => $i->quantity, 'unit_price' => (float) $i->unit_price, 'total' => (float) $i->total,

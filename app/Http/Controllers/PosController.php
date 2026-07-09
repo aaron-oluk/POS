@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\OrderPayment;
 use App\Models\Product;
 use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
@@ -34,8 +35,9 @@ class PosController extends Controller
             'discount_type' => ['nullable', 'in:percent,fixed'],
             'discount_value' => ['nullable', 'numeric', 'min:0'],
             'tip_percent' => ['nullable', 'numeric', 'min:0'],
-            'payment_method' => ['required', 'in:cash,card,mobile'],
-            'cash_received' => ['nullable', 'numeric', 'min:0'],
+            'payments' => ['required', 'array', 'min:1'],
+            'payments.*.method' => ['required', 'in:cash,card,mobile'],
+            'payments.*.amount' => ['required', 'numeric', 'min:0.01'],
             'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
         ]);
 
@@ -95,12 +97,36 @@ class PosController extends Controller
 
             $total = round($afterDiscount + $tax + $tip, 2);
 
-            if ($data['payment_method'] === 'cash') {
-                $cashReceived = (float) ($data['cash_received'] ?? 0);
-                if ($cashReceived < $total) {
-                    abort(422, 'Insufficient cash received.');
-                }
+            // Card/mobile charge exactly what's allocated to them (no "change" concept);
+            // only cash can overshoot, with the excess returned to the customer as change.
+            $nonCashTotal = round(collect($data['payments'])->where('method', '!=', 'cash')->sum('amount'), 2);
+            if ($nonCashTotal > $total + 0.01) {
+                abort(422, 'Card/mobile payment amounts exceed the order total.');
             }
+
+            $cashGiven = round(collect($data['payments'])->where('method', 'cash')->sum('amount'), 2);
+            $remainingForCash = round($total - $nonCashTotal, 2);
+
+            if ($remainingForCash > 0.01 && $cashGiven < $remainingForCash - 0.01) {
+                abort(422, 'Insufficient payment amount.');
+            }
+
+            $cashApplied = $remainingForCash > 0 ? min($cashGiven, $remainingForCash) : 0;
+            $changeDue = round($cashGiven - $cashApplied, 2);
+
+            $appliedByMethod = [];
+            foreach ($data['payments'] as $payment) {
+                if ($payment['method'] === 'cash') {
+                    continue;
+                }
+                $appliedByMethod[$payment['method']] = ($appliedByMethod[$payment['method']] ?? 0) + round($payment['amount'], 2);
+            }
+            if ($cashApplied > 0) {
+                $appliedByMethod['cash'] = $cashApplied;
+            }
+
+            $methodsUsed = array_keys($appliedByMethod);
+            $paymentMethod = count($methodsUsed) === 1 ? $methodsUsed[0] : 'split';
 
             $order = Order::create([
                 'customer_id' => $data['customer_id'] ?? null,
@@ -112,9 +138,17 @@ class PosController extends Controller
                 'tax' => $tax,
                 'tip' => $tip,
                 'total' => $total,
-                'payment_method' => $data['payment_method'],
+                'payment_method' => $paymentMethod,
                 'status' => 'completed',
             ]);
+
+            foreach ($appliedByMethod as $method => $amount) {
+                OrderPayment::create([
+                    'order_id' => $order->id,
+                    'method' => $method,
+                    'amount' => $amount,
+                ]);
+            }
 
             foreach ($lines as $line) {
                 OrderItem::create([
@@ -129,7 +163,7 @@ class PosController extends Controller
                 $line['product']->decrement('stock', $line['qty']);
             }
 
-            $order->load('items', 'customer', 'cashier');
+            $order->load('items', 'customer', 'cashier', 'payments');
 
             return response()->json([
                 'order' => [
@@ -150,7 +184,12 @@ class PosController extends Controller
                     'tax_name' => $settings->tax_name,
                     'tip' => (float) $order->tip,
                     'total' => (float) $order->total,
-                    'payment_method' => Order::paymentLabel($order->payment_method),
+                    'payment_method' => $order->payment_summary,
+                    'payments' => $order->payments->map(fn ($p) => [
+                        'method' => Order::paymentLabel($p->method),
+                        'amount' => (float) $p->amount,
+                    ]),
+                    'change_due' => $changeDue,
                 ],
                 'remaining_stock' => $lines ? collect($lines)->mapWithKeys(fn ($l) => [$l['product']->id => $l['product']->fresh()->stock]) : [],
             ]);

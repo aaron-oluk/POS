@@ -94,10 +94,10 @@
     <td>
       <div class="section-title">Payment Methods</div>
       <table class="data">
-        <thead><tr><th>Method</th><th class="num">Orders</th></tr></thead>
+        <thead><tr><th>Method</th><th class="num">Collected</th></tr></thead>
         <tbody>
-          @forelse ($paymentCounts as $method => $count)
-            <tr><td>{{ ['cash' => 'Cash', 'card' => 'Card', 'mobile' => 'Mobile Pay'][$method] ?? ucfirst($method) }}</td><td class="num">{{ $count }}</td></tr>
+          @forelse ($paymentTotals as $method => $amount)
+            <tr><td>{{ ['cash' => 'Cash', 'card' => 'Card', 'mobile' => 'Mobile Pay'][$method] ?? ucfirst($method) }}</td><td class="num">{{ $settings->money($amount) }}</td></tr>
           @empty
             <tr><td colspan="2">No data</td></tr>
           @endforelse

@@ -5,7 +5,6 @@ const CART_STORAGE_KEY = 'nexus-pos-cart-v1';
 let cart = [];
 let discountType = 'percent';
 let discountValue = 0;
-let selectedPayMethod = 'cash';
 let currentTip = 0;
 let currentPosCategory = 'All';
 
@@ -146,6 +145,7 @@ function clearCart() {
     cart = [];
     discountValue = 0;
     currentTip = 0;
+    clearCartState();
     renderCart();
     showToast('Cart cleared', 'info');
 }
@@ -194,6 +194,7 @@ function renderCart() {
     document.getElementById('cartDiscount').textContent = '-' + window.formatMoney(t.disc);
     document.getElementById('cartTotal').textContent = window.formatMoney(t.total);
     renderPosGrid();
+    saveCartState();
 }
 
 document.getElementById('posSearch').addEventListener('input', renderPosGrid);
@@ -230,6 +231,24 @@ document.getElementById('removeDiscountBtn').addEventListener('click', () => {
 });
 
 // ===== Payment modal =====
+// A single method (the common case) behaves exactly as before: pick one,
+// pay the full total through it. Selecting more than one method switches to
+// "split" mode — a per-method amount input appears for each selected method,
+// and a running Remaining/Change Due indicator tracks whether they add up.
+
+let selectedPayMethods = new Set(['cash']);
+let splitAmounts = {};
+
+const METHOD_LABELS = { cash: 'Cash', card: 'Card', mobile: 'Mobile' };
+const METHOD_ORDER = ['cash', 'card', 'mobile'];
+
+function round2(n) {
+    return Math.round((n + Number.EPSILON) * 100) / 100;
+}
+
+function isSplitMode() {
+    return selectedPayMethods.size > 1;
+}
 
 // Rounds up to a "nice" 1/2/5-style step at the value's own order of magnitude,
 // so quick-cash suggestions look like real bills/notes in whatever currency is active.
@@ -245,11 +264,15 @@ function niceRoundUp(value) {
     return nice * magnitude;
 }
 
+function quickCashAmounts(base) {
+    const safeBase = base > 0 ? base : 1;
+    return [...new Set([1, 1.5, 2, 3, 5].map((m) => niceRoundUp(safeBase * m)))];
+}
+
 function renderQuickCashButtons(total) {
     const container = document.getElementById('quickCashButtons');
     if (!container) return;
-    const base = total > 0 ? total : 1;
-    const amounts = [...new Set([1, 1.5, 2, 3, 5].map((m) => niceRoundUp(base * m)))];
+    const amounts = quickCashAmounts(total);
 
     container.innerHTML = amounts.map((amt) =>
         `<button type="button" class="btn btn-secondary btn-sm quick-cash" data-amt="${amt}">${window.formatMoney(amt)}</button>`
@@ -264,6 +287,89 @@ function renderQuickCashButtons(total) {
     });
 }
 
+function renderSplitRows() {
+    const container = document.getElementById('splitRows');
+    if (!container) return;
+    const methods = METHOD_ORDER.filter((m) => selectedPayMethods.has(m));
+
+    container.innerHTML = methods.map((method) => `
+        <div class="input-group" style="margin-bottom:10px;">
+            <label>${METHOD_LABELS[method]} amount</label>
+            <input type="number" class="input-field split-amount-input" data-method="${method}" placeholder="0.00" value="${splitAmounts[method] || ''}">
+        </div>
+        ${method === 'cash' ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;" id="splitQuickCash"></div>' : ''}
+    `).join('');
+
+    container.querySelectorAll('.split-amount-input').forEach((input) => {
+        input.addEventListener('input', () => {
+            splitAmounts[input.dataset.method] = parseFloat(input.value) || 0;
+            updateSplitStatus();
+        });
+    });
+
+    renderSplitQuickCash();
+}
+
+function renderSplitQuickCash() {
+    const container = document.getElementById('splitQuickCash');
+    if (!container) return;
+    const t = getCartTotals();
+    const enteredForOthers = [...selectedPayMethods]
+        .filter((m) => m !== 'cash')
+        .reduce((s, m) => s + (splitAmounts[m] || 0), 0);
+    const remaining = Math.max(0, round2(t.total - enteredForOthers));
+    const amounts = quickCashAmounts(remaining);
+
+    container.innerHTML = amounts.map((amt) =>
+        `<button type="button" class="btn btn-secondary btn-sm quick-cash" data-amt="${amt}">${window.formatMoney(amt)}</button>`
+    ).join('') + `<button type="button" class="btn btn-secondary btn-sm quick-cash" data-amt="exact">Exact</button>`;
+
+    container.querySelectorAll('.quick-cash').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const amt = btn.dataset.amt === 'exact' ? remaining : parseFloat(btn.dataset.amt);
+            splitAmounts.cash = amt;
+            const input = document.querySelector('.split-amount-input[data-method="cash"]');
+            if (input) input.value = amt ? amt.toFixed(2) : '';
+            updateSplitStatus();
+        });
+    });
+}
+
+function updateSplitStatus() {
+    const t = getCartTotals();
+    const entered = [...selectedPayMethods].reduce((s, m) => s + (splitAmounts[m] || 0), 0);
+    const diff = round2(t.total - entered);
+    const label = document.getElementById('splitStatusLabel');
+    const amount = document.getElementById('splitStatusAmount');
+    if (diff > 0.001) {
+        label.textContent = 'Remaining';
+        amount.textContent = window.formatMoney(diff);
+        amount.style.color = 'var(--danger)';
+    } else {
+        label.textContent = selectedPayMethods.has('cash') ? 'Change Due' : 'Fully Covered';
+        amount.textContent = window.formatMoney(Math.abs(diff));
+        amount.style.color = 'var(--success)';
+    }
+}
+
+function renderPaymentModalBody() {
+    const t = getCartTotals();
+    const cashSection = document.getElementById('cashSection');
+    const splitSection = document.getElementById('splitSection');
+
+    if (isSplitMode()) {
+        cashSection.style.display = 'none';
+        splitSection.style.display = 'block';
+        renderSplitRows();
+        updateSplitStatus();
+    } else {
+        splitSection.style.display = 'none';
+        const onlyMethod = [...selectedPayMethods][0];
+        cashSection.style.display = onlyMethod === 'cash' ? 'block' : 'none';
+        if (onlyMethod === 'cash') renderQuickCashButtons(t.total);
+    }
+}
+
 document.getElementById('showPaymentBtn').addEventListener('click', () => {
     if (cart.length === 0) { showToast('Cart is empty', 'warning'); return; }
     const t = getCartTotals();
@@ -272,16 +378,27 @@ document.getElementById('showPaymentBtn').addEventListener('click', () => {
     document.getElementById('changeDue').textContent = window.formatMoney(0);
     currentTip = 0;
     document.querySelectorAll('.tip-btn').forEach((b) => (b.style.borderColor = 'var(--border)'));
-    renderQuickCashButtons(t.total);
+
+    // Reset to the simple single-cash flow every time the modal opens.
+    selectedPayMethods = new Set(['cash']);
+    splitAmounts = {};
+    document.querySelectorAll('.pay-method').forEach((m) => m.classList.toggle('selected', m.dataset.method === 'cash'));
+    renderPaymentModalBody();
+
     openModal('paymentModal');
 });
 document.querySelectorAll('.pay-method').forEach((el) => {
     el.addEventListener('click', () => {
-        document.querySelectorAll('.pay-method').forEach((m) => m.classList.remove('selected'));
-        el.classList.add('selected');
-        selectedPayMethod = el.dataset.method;
-        const cashSection = document.getElementById('cashSection');
-        if (cashSection) cashSection.style.display = selectedPayMethod === 'cash' ? 'block' : 'none';
+        const method = el.dataset.method;
+        if (selectedPayMethods.has(method)) {
+            if (selectedPayMethods.size === 1) return; // at least one method must stay selected
+            selectedPayMethods.delete(method);
+            delete splitAmounts[method];
+        } else {
+            selectedPayMethods.add(method);
+        }
+        el.classList.toggle('selected', selectedPayMethods.has(method));
+        renderPaymentModalBody();
     });
 });
 function calcChange() {
@@ -301,7 +418,7 @@ document.querySelectorAll('.tip-btn').forEach((btn) => {
         document.querySelectorAll('.tip-btn').forEach((b) => {
             b.style.borderColor = b === btn ? 'var(--accent)' : 'var(--border)';
         });
-        renderQuickCashButtons(t.total);
+        renderPaymentModalBody();
         calcChange();
     });
 });
@@ -310,9 +427,24 @@ document.getElementById('processPayBtn').addEventListener('click', async () => {
     const t = getCartTotals();
     const btn = document.getElementById('processPayBtn');
 
-    if (selectedPayMethod === 'cash') {
-        const received = parseFloat(document.getElementById('cashReceived').value) || 0;
-        if (received < t.total) { showToast('Insufficient amount received', 'error'); return; }
+    let payments;
+    if (isSplitMode()) {
+        payments = [...selectedPayMethods]
+            .map((method) => ({ method, amount: splitAmounts[method] || 0 }))
+            .filter((p) => p.amount > 0);
+        const nonCash = payments.filter((p) => p.method !== 'cash').reduce((s, p) => s + p.amount, 0);
+        const cashAmt = payments.filter((p) => p.method === 'cash').reduce((s, p) => s + p.amount, 0);
+        if (nonCash > t.total + 0.01) { showToast('Card/mobile amounts exceed the total', 'error'); return; }
+        if (nonCash + cashAmt < t.total - 0.01) { showToast('Amounts entered do not cover the total', 'error'); return; }
+    } else {
+        const method = [...selectedPayMethods][0];
+        if (method === 'cash') {
+            const received = parseFloat(document.getElementById('cashReceived').value) || 0;
+            if (received < t.total) { showToast('Insufficient amount received', 'error'); return; }
+            payments = [{ method: 'cash', amount: received }];
+        } else {
+            payments = [{ method, amount: t.total }];
+        }
     }
 
     btn.disabled = true;
@@ -322,8 +454,7 @@ document.getElementById('processPayBtn').addEventListener('click', async () => {
             discount_type: discountValue > 0 ? discountType : null,
             discount_value: discountValue,
             tip_percent: currentTip,
-            payment_method: selectedPayMethod,
-            cash_received: selectedPayMethod === 'cash' ? (parseFloat(document.getElementById('cashReceived').value) || 0) : null,
+            payments,
             customer_id: document.getElementById('posCustomer').value || null,
         };
         const result = await window.postJson(checkoutUrl, payload);
@@ -336,7 +467,9 @@ document.getElementById('processPayBtn').addEventListener('click', async () => {
 
         showReceipt(result.order);
         closeModal('paymentModal');
-        cart = []; discountValue = 0; currentTip = 0; renderCart();
+        cart = []; discountValue = 0; currentTip = 0;
+        clearCartState();
+        renderCart();
         showToast('Payment completed successfully!', 'success');
     } catch (e) {
         showToast(e.message || 'Payment failed', 'error');
@@ -350,6 +483,9 @@ function showReceipt(order) {
     const itemsHtml = order.items.map((it) => `
         <div class="receipt-row"><span>${it.name} x${it.qty}</span><span>${window.formatMoney(it.total)}</span></div>
     `).join('');
+    const paymentHtml = order.payments.length > 1
+        ? order.payments.map((p) => `<div class="receipt-row"><span>${p.method}</span><span>${window.formatMoney(p.amount)}</span></div>`).join('')
+        : `<div class="receipt-row"><span>Payment</span><span>${order.payment_method}</span></div>`;
     document.getElementById('receiptContent').innerHTML = `
         <div class="receipt">
             <div class="receipt-center"><strong style="font-size:16px;">${window.storeName ?? 'Nexus Coffee & Co.'}</strong></div>
@@ -367,7 +503,8 @@ function showReceipt(order) {
             ${order.tip > 0 ? `<div class="receipt-row"><span>Tip</span><span>${window.formatMoney(order.tip)}</span></div>` : ''}
             <div class="receipt-divider"></div>
             <div class="receipt-row receipt-total"><span>TOTAL</span><span>${window.formatMoney(order.total)}</span></div>
-            <div class="receipt-row"><span>Payment</span><span>${order.payment_method}</span></div>
+            ${paymentHtml}
+            ${order.change_due > 0.005 ? `<div class="receipt-row"><span>Change</span><span>${window.formatMoney(order.change_due)}</span></div>` : ''}
             <div class="receipt-divider"></div>
             <div class="receipt-center" style="font-size:11px;">Thank you for visiting!</div>
         </div>
@@ -375,5 +512,8 @@ function showReceipt(order) {
     openModal('receiptModal');
 }
 
+document.getElementById('posCustomer')?.addEventListener('change', saveCartState);
+
 renderPosCategories();
+restoreCartState();
 renderCart();
