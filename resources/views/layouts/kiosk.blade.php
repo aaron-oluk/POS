@@ -33,6 +33,7 @@
       <div class="sidebar-logo" style="margin-right:10px;">{{ mb_substr($settings->store_name, 0, 1) }}</div>
       <div style="font-weight:700;font-family:'Figtree';font-size:16px;">{{ $settings->store_name }}</div>
       <div class="topbar-actions">
+        <button class="topbar-btn" id="fullscreenToggle" aria-label="Toggle fullscreen" data-tooltip="Toggle fullscreen"><i class="bx bx-fullscreen"></i></button>
         <button class="topbar-btn" id="themeToggle" aria-label="Toggle theme" data-tooltip="Toggle theme"><i class="bx {{ $settings->dark_mode ? 'bxs-moon' : 'bxs-sun' }}"></i></button>
         <a href="{{ route('login') }}" class="topbar-btn" aria-label="Staff Login" data-tooltip="Staff Login"><i class="bx bx-log-in"></i></a>
       </div>
@@ -64,5 +65,35 @@
 
 @stack('modals')
 @stack('scripts')
+<script>
+  // Kiosks are meant to run fullscreen on an unattended tablet/terminal, but
+  // browsers only allow requestFullscreen() from inside a real user gesture —
+  // so it can't fire on page load. Catch the customer's very first tap
+  // anywhere and use that gesture to go fullscreen automatically; the topbar
+  // button covers manually entering/exiting it afterward.
+  function isFullscreen() {
+    return !!document.fullscreenElement;
+  }
+  function enterFullscreen() {
+    const el = document.documentElement;
+    (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
+  }
+  function exitFullscreen() {
+    (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+  }
+  function updateFullscreenIcon() {
+    const btn = document.getElementById('fullscreenToggle');
+    if (!btn) return;
+    btn.innerHTML = isFullscreen() ? '<i class="bx bx-exit-fullscreen"></i>' : '<i class="bx bx-fullscreen"></i>';
+  }
+  document.getElementById('fullscreenToggle')?.addEventListener('click', () => {
+    isFullscreen() ? exitFullscreen() : enterFullscreen();
+  });
+  document.addEventListener('fullscreenchange', updateFullscreenIcon);
+  document.addEventListener('click', function autoFullscreen() {
+    if (!isFullscreen()) enterFullscreen();
+    document.removeEventListener('click', autoFullscreen);
+  }, { once: true });
+</script>
 </body>
 </html>

@@ -12,7 +12,21 @@
 <body>
 <div class="bg-pattern"></div>
 <div class="login-wrap">
-  <div class="login-card">
+  @if ($settings->self_checkout_enabled && ! $errors->any())
+  <div class="login-card" id="choiceView" style="text-align:center;">
+    <div class="login-logo">
+      <div class="sidebar-logo">N</div>
+      <h1>{{ config('app.name') }}</h1>
+      <p>{{ $settings->store_name }}</p>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button type="button" class="btn btn-primary btn-lg" id="showStaffLoginBtn"><i class="bx bxs-log-in"></i> Staff Sign In</button>
+      <a href="{{ route('self-checkout.index') }}" class="btn btn-secondary btn-lg"><i class="bx bx-scan"></i> Self-Checkout</a>
+    </div>
+  </div>
+  @endif
+
+  <div class="login-card" id="formView" style="{{ $settings->self_checkout_enabled && ! $errors->any() ? 'display:none;' : '' }}">
     <div class="login-logo">
       <div class="sidebar-logo">N</div>
       <h1>{{ config('app.name') }}</h1>
@@ -39,18 +53,24 @@
     </form>
 
     @if ($settings->self_checkout_enabled)
-    <div style="display:flex;align-items:center;gap:10px;margin:20px 0;">
-      <div style="flex:1;height:1px;background:var(--border);"></div>
-      <span style="font-size:11px;color:var(--fg-dim);">OR</span>
-      <div style="flex:1;height:1px;background:var(--border);"></div>
-    </div>
-    <a href="{{ route('self-checkout.index') }}" class="btn btn-secondary btn-lg" style="width:100%;justify-content:center;">
-      <i class="bx bx-scan"></i> Self-Checkout
-    </a>
+    <button type="button" class="btn btn-secondary btn-lg" id="backToChoiceBtn" style="width:100%;justify-content:center;margin-top:10px;">
+      <i class="bx bx-arrow-back"></i> Back
+    </button>
     @endif
 
     <div class="login-hint">Demo: sarah@nexuscoffee.com / password</div>
   </div>
 </div>
+<script>
+  document.getElementById('showStaffLoginBtn')?.addEventListener('click', () => {
+    document.getElementById('choiceView').style.display = 'none';
+    document.getElementById('formView').style.display = '';
+    document.getElementById('email').focus();
+  });
+  document.getElementById('backToChoiceBtn')?.addEventListener('click', () => {
+    document.getElementById('formView').style.display = 'none';
+    document.getElementById('choiceView').style.display = '';
+  });
+</script>
 </body>
 </html>

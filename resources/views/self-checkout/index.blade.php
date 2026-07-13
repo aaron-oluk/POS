@@ -3,44 +3,46 @@
 @section('title', 'Self-Checkout')
 
 @section('content')
-<div class="page-header" style="margin-bottom:12px;">
-  <div>
-    <h1 class="page-title">Self-Checkout</h1>
-    <p class="page-subtitle">Tap items to add them, then pay by card or mobile — no cashier needed</p>
+<div style="display:flex;flex-direction:column;height:calc(100vh - 4rem - 3rem);margin:-1.5rem;background:var(--bg);position:relative;z-index:1;">
+  <div class="page-header" style="flex-shrink:0;margin:0;padding:1.5rem 1.5rem 12px;background:var(--bg);">
+    <div>
+      <h1 class="page-title">Self-Checkout</h1>
+      <p class="page-subtitle">Tap items to add them, then pay by card or mobile — no cashier needed</p>
+    </div>
+    <span class="badge badge-info"><i class="bx bx-scan"></i> Self-Checkout</span>
   </div>
-  <span class="badge badge-info"><i class="bx bx-scan"></i> Self-Checkout</span>
-</div>
-<div class="pos-layout">
-  <div class="pos-products">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-      <div class="pos-categories" id="posCategories"></div>
-      <div class="topbar-search" style="max-width:200px;">
-        <i class="bx bx-barcode"></i>
-        <input type="text" placeholder="Scan barcode..." id="posBarcode" aria-label="Scan barcode">
+  <div class="pos-layout" style="flex:1;height:auto;min-height:0;margin:0;">
+    <div class="pos-products" style="padding:0 1.25rem 1.25rem;">
+      <div style="position:sticky;top:0;z-index:2;background:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:1.25rem 0 12px;flex-wrap:wrap;gap:8px;">
+        <div class="pos-categories" id="posCategories"></div>
+        <div class="topbar-search" style="max-width:200px;">
+          <i class="bx bx-barcode"></i>
+          <input type="text" placeholder="Scan barcode..." id="posBarcode" aria-label="Scan barcode">
+        </div>
+        <div class="topbar-search" style="max-width:240px;">
+          <i class="bx bxs-search"></i>
+          <input type="text" placeholder="Search items..." id="posSearch" aria-label="Search items">
+        </div>
       </div>
-      <div class="topbar-search" style="max-width:240px;">
-        <i class="bx bxs-search"></i>
-        <input type="text" placeholder="Search items..." id="posSearch" aria-label="Search items">
+      <div class="pos-grid" id="posGrid"></div>
+    </div>
+    <div class="pos-cart" id="posCart">
+      <div class="pos-cart-header">
+        <h3>Your Order</h3>
+        <div style="display:flex;gap:6px;">
+          <button class="btn-icon btn-danger" id="clearCartBtn" aria-label="Clear Cart" data-tooltip="Clear Cart"><i class="bx bxs-trash"></i></button>
+        </div>
       </div>
-    </div>
-    <div class="pos-grid" id="posGrid"></div>
-  </div>
-  <div class="pos-cart" id="posCart">
-    <div class="pos-cart-header">
-      <h3>Your Order</h3>
-      <div style="display:flex;gap:6px;">
-        <button class="btn-icon btn-danger" id="clearCartBtn" aria-label="Clear Cart" data-tooltip="Clear Cart"><i class="bx bxs-trash"></i></button>
+      <div class="pos-cart-items" id="posCartItems">
+        <div class="pos-cart-empty"><i class="bx bxs-basket"></i><div>Cart is empty</div><div style="font-size:11px;">Tap a product to add it</div></div>
       </div>
-    </div>
-    <div class="pos-cart-items" id="posCartItems">
-      <div class="pos-cart-empty"><i class="bx bxs-basket"></i><div>Cart is empty</div><div style="font-size:11px;">Tap a product to add it</div></div>
-    </div>
-    <div class="pos-cart-footer">
-      <div class="pos-cart-row"><span style="color:var(--fg-muted)">Subtotal</span><span id="cartSubtotal">$0.00</span></div>
-      <div class="pos-cart-row"><span style="color:var(--fg-muted)">{{ $settings->tax_name }} ({{ rtrim(rtrim(number_format($settings->tax_rate, 2), '0'), '.') }}%)</span><span id="cartTax">$0.00</span></div>
-      <div class="pos-cart-row total"><span>Total</span><span id="cartTotal">$0.00</span></div>
-      <div class="pos-cart-actions">
-        <button class="btn btn-primary btn-lg" id="showPaymentBtn" style="width:100%;"><i class="bx bxs-credit-card"></i> Pay</button>
+      <div class="pos-cart-footer">
+        <div class="pos-cart-row"><span style="color:var(--fg-muted)">Subtotal</span><span id="cartSubtotal">$0.00</span></div>
+        <div class="pos-cart-row"><span style="color:var(--fg-muted)">{{ $settings->tax_name }} ({{ rtrim(rtrim(number_format($settings->tax_rate, 2), '0'), '.') }}%)</span><span id="cartTax">$0.00</span></div>
+        <div class="pos-cart-row total"><span>Total</span><span id="cartTotal">$0.00</span></div>
+        <div class="pos-cart-actions">
+          <button class="btn btn-primary btn-lg" id="showPaymentBtn" style="width:100%;"><i class="bx bxs-credit-card"></i> Pay</button>
+        </div>
       </div>
     </div>
   </div>
