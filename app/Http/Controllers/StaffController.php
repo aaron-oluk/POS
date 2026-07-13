@@ -11,7 +11,8 @@ class StaffController extends Controller
 {
     public function index(): View
     {
-        $staff = User::withSum(['orders' => fn ($q) => $q->where('status', 'completed')], 'total')
+        $staff = User::where('is_system', false)
+            ->withSum(['orders' => fn ($q) => $q->where('status', 'completed')], 'total')
             ->withCount(['orders' => fn ($q) => $q->where('status', 'completed')])
             ->orderByDesc('orders_sum_total')
             ->get();

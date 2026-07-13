@@ -16,7 +16,9 @@ return new class extends Migration
             $table->foreignId('supplier_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('reference_no')->nullable();
+            $table->date('supply_date')->nullable();
             $table->decimal('total', 10, 2)->default(0);
+            $table->decimal('amount_paid', 10, 2)->default(0);
             $table->text('notes')->nullable();
             $table->timestamps();
         });

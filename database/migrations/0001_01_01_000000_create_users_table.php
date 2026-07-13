@@ -1,8 +1,11 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 return new class extends Migration
 {
@@ -18,6 +21,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('role', ['admin', 'manager', 'cashier', 'barista'])->default('cashier');
+            $table->boolean('is_system')->default(false);
             $table->string('phone')->nullable();
             $table->boolean('active')->default(true);
             $table->string('avatar_seed')->nullable();
@@ -40,6 +44,17 @@ return new class extends Migration
             $table->longText('payload');
             $table->integer('last_activity')->index();
         });
+
+        User::create([
+            'name' => 'Self-Checkout Kiosk',
+            'email' => User::KIOSK_EMAIL,
+            'role' => 'cashier',
+            'active' => false,
+            'is_system' => true,
+            'avatar_seed' => 'kiosk',
+            'color' => '#94a3b8',
+            'password' => Hash::make(Str::random(40)),
+        ]);
     }
 
     /**
@@ -47,8 +62,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
     }
 };

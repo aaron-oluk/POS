@@ -38,6 +38,17 @@
       </button>
     </form>
 
+    @if ($settings->self_checkout_enabled)
+    <div style="display:flex;align-items:center;gap:10px;margin:20px 0;">
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+      <span style="font-size:11px;color:var(--fg-dim);">OR</span>
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+    </div>
+    <a href="{{ route('self-checkout.index') }}" class="btn btn-secondary btn-lg" style="width:100%;justify-content:center;">
+      <i class="bx bx-scan"></i> Self-Checkout
+    </a>
+    @endif
+
     <div class="login-hint">Demo: sarah@nexuscoffee.com / password</div>
   </div>
 </div>

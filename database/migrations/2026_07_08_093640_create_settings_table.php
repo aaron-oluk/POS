@@ -39,6 +39,7 @@ return new class extends Migration
             $table->boolean('mobile_enabled')->default(true);
             $table->boolean('gift_cards_enabled')->default(true);
             $table->boolean('split_payment_enabled')->default(true);
+            $table->boolean('self_checkout_enabled')->default(false);
             $table->string('tip_options')->default('15, 18, 20, 25');
             $table->string('default_tip')->default('18%');
             $table->boolean('prompt_tips')->default(true);

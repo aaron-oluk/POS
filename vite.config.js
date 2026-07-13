@@ -8,6 +8,7 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/js/app.js',
                 'resources/js/pages/pos.js',
+                'resources/js/pages/self-checkout.js',
             ],
             refresh: true,
         }),

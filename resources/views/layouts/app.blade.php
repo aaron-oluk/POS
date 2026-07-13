@@ -39,7 +39,7 @@
       <div class="nav-section">
         <div class="nav-section-title">Main</div>
         <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="bx bxs-dashboard"></i><span>Dashboard</span></a>
-        <a href="{{ route('pos.index') }}" class="nav-item {{ request()->routeIs('pos.*') ? 'active' : '' }}"><i class="bx bxs-store-alt"></i><span>{{ \App\Models\Setting::current()->self_checkout_enabled ? 'Self-Checkout' : 'POS Terminal' }}</span></a>
+        <a href="{{ route('pos.index') }}" class="nav-item {{ request()->routeIs('pos.*') ? 'active' : '' }}"><i class="bx bxs-store-alt"></i><span>POS Terminal</span></a>
         <a href="{{ route('orders.index') }}" class="nav-item {{ request()->routeIs('orders.*') ? 'active' : '' }}"><i class="bx bxs-receipt"></i><span>Orders</span></a>
         <a href="{{ route('cash-register.index') }}" class="nav-item {{ request()->routeIs('cash-register.*') ? 'active' : '' }}"><i class="bx bxs-wallet"></i><span>Cash Register</span></a>
       </div>

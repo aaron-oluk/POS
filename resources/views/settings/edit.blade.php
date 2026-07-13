@@ -108,6 +108,15 @@
       </div>
       <label class="toggle"><input type="checkbox" name="self_checkout_enabled" {{ $settings->self_checkout_enabled ? 'checked' : '' }}><span class="toggle-slider"></span></label>
     </div>
+    @if ($settings->self_checkout_enabled)
+    <div class="settings-row">
+      <div>
+        <div class="settings-row-label">Self-Checkout Kiosk</div>
+        <div class="settings-row-desc">The public, unauthenticated page customers use — open this on a customer-facing tablet or terminal.</div>
+      </div>
+      <a href="{{ route('self-checkout.index') }}" target="_blank" class="btn btn-secondary btn-sm"><i class="bx bx-link-external"></i> Launch Kiosk</a>
+    </div>
+    @endif
     <h3 style="margin-top:24px;">Payment Methods</h3>
     @foreach ([
       'cash_enabled' => ['Cash', 'Accept cash payments with change calculation'],

@@ -14,6 +14,11 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * Email of the seeded system account that owns unattended self-checkout orders.
+     */
+    const KIOSK_EMAIL = 'self-checkout@system.internal';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
@@ -27,6 +32,7 @@ class User extends Authenticatable
         'active',
         'avatar_seed',
         'color',
+        'is_system',
     ];
 
     /**
@@ -50,6 +56,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'active' => 'boolean',
+            'is_system' => 'boolean',
         ];
     }
 
@@ -61,5 +68,14 @@ class User extends Authenticatable
     public function isManager(): bool
     {
         return in_array($this->role, ['admin', 'manager']);
+    }
+
+    /**
+     * The system account that owns orders placed through the unauthenticated
+     * self-checkout kiosk (seeded by the add_is_system_to_users_table migration).
+     */
+    public static function kiosk(): self
+    {
+        return once(fn () => static::where('email', static::KIOSK_EMAIL)->firstOrFail());
     }
 }

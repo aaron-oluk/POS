@@ -11,6 +11,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SelfCheckoutController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\StockAdjustmentController;
@@ -22,6 +23,13 @@ Route::get('/', fn () => redirect()->route('dashboard'));
 Route::get('/login', [LoginController::class, 'create'])->name('login')->middleware('guest');
 Route::post('/login', [LoginController::class, 'store'])->middleware('guest');
 Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+
+// Public, unauthenticated kiosk — a customer at the terminal never logs in.
+// Throttled since it's reachable by anyone who can reach the server.
+Route::middleware('throttle:30,1')->group(function () {
+    Route::get('/self-checkout', [SelfCheckoutController::class, 'index'])->name('self-checkout.index');
+    Route::post('/self-checkout/checkout', [SelfCheckoutController::class, 'checkout'])->name('self-checkout.checkout');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
