@@ -1,17 +1,56 @@
 @extends('layouts.app')
 
-@section('title', 'Stock Adjustments')
+@section('title', 'Stock Management')
 
 @section('content')
 <div class="page-header">
   <div>
-    <h1 class="page-title">Stock Adjustments</h1>
-    <p class="page-subtitle">Correct inventory counts with a reason and audit trail</p>
+    <h1 class="page-title">Stock Management</h1>
+    <p class="page-subtitle">Track inventory levels and every stock movement</p>
   </div>
-  <button class="btn btn-primary btn-sm" onclick="openAdjustmentModal()"><i class="bx bx-plus"></i> New Adjustment</button>
+  <button class="btn btn-primary btn-sm" onclick="openAdjustmentModal()"><i class="bx bx-plus"></i> Add Stock</button>
+</div>
+
+<div class="grid grid-4" style="margin-bottom:20px;">
+  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--accent-dim);color:var(--accent);width:40px;height:40px;font-size:15px;"><i class="bx bxs-archive"></i></div><div><div class="stat-label">Total Products</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $totalProducts }}</div></div></div>
+  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--warning-dim);color:var(--warning);width:40px;height:40px;font-size:15px;"><i class="bx bxs-error"></i></div><div><div class="stat-label">Low Stock</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $lowStockCount }}</div></div></div>
+  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--danger-dim);color:var(--danger);width:40px;height:40px;font-size:15px;"><i class="bx bx-block"></i></div><div><div class="stat-label">Out of Stock</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">{{ $outOfStockCount }}</div></div></div>
+  <div class="card" style="display:flex;align-items:center;gap:12px;"><div class="stat-icon" style="background:var(--success-dim);color:var(--success);width:40px;height:40px;font-size:15px;"><i class="bx bxs-dollar-circle"></i></div><div><div class="stat-label">Inventory Value</div><div style="font-family:'Figtree';font-size:22px;font-weight:700;">@money($inventoryValue)</div></div></div>
+</div>
+
+<div class="card" style="margin-bottom:20px;">
+  <h3 style="margin-bottom:12px;">Current Inventory</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Product</th><th>Category</th><th>Cost</th><th>Price</th><th>Stock</th><th>Status</th><th>Value</th><th>Actions</th></tr></thead>
+      <tbody>
+        @forelse ($products as $p)
+        <tr>
+          <td><div style="display:flex;align-items:center;gap:10px;"><span style="font-size:20px;">{{ $p->icon }}</span><div><div style="font-weight:600;">{{ $p->name }}</div><div style="font-size:11px;color:var(--fg-dim);">{{ $p->sku }}</div></div></div></td>
+          <td><span class="badge badge-muted">{{ $p->category->name }}</span></td>
+          <td>@money($p->cost)</td>
+          <td>@money($p->price)</td>
+          <td style="font-family:'Figtree';font-weight:600;">{{ $p->stock }}</td>
+          <td>
+            @if ($p->stock_status === 'out')<span class="badge badge-danger">Out of Stock</span>
+            @elseif ($p->stock_status === 'low')<span class="badge badge-warning">Low Stock</span>
+            @else<span class="badge badge-success">In Stock</span>@endif
+          </td>
+          <td style="color:var(--fg-muted);">@money($p->stock * $p->cost)</td>
+          <td>
+            <button class="btn btn-secondary btn-sm btn-icon" onclick="openAdjustmentModal({{ $p->id }})" aria-label="Adjust stock" data-tooltip="Adjust stock"><i class="bx bx-slider-alt" style="font-size:11px;"></i></button>
+          </td>
+        </tr>
+        @empty
+        <tr><td colspan="8" style="text-align:center;color:var(--fg-muted);">No products found</td></tr>
+        @endforelse
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <div class="card">
+  <h3 style="margin-bottom:12px;">Stock Movement History</h3>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Product</th><th>Type</th><th>Reason</th><th>Qty</th><th>Before → After</th><th>By</th><th>Date</th><th>Notes</th></tr></thead>
@@ -28,7 +67,7 @@
           <td style="color:var(--fg-muted);font-size:11px;">{{ $a->notes ?? '—' }}</td>
         </tr>
         @empty
-        <tr><td colspan="8" style="text-align:center;color:var(--fg-muted);">No stock adjustments recorded yet</td></tr>
+        <tr><td colspan="8" style="text-align:center;color:var(--fg-muted);">No stock movement recorded yet</td></tr>
         @endforelse
       </tbody>
     </table>
@@ -41,10 +80,10 @@
 <div class="modal-overlay" id="adjustmentModal">
   <div class="modal" style="max-width:480px;">
     <div class="modal-header">
-      <h3>New Stock Adjustment</h3>
+      <h3>Add / Adjust Stock</h3>
       <button class="modal-close" onclick="closeModal('adjustmentModal')" aria-label="Close" data-tooltip="Close"><i class="bx bx-x"></i></button>
     </div>
-    <form id="adjustmentForm" method="POST" action="{{ route('stock-adjustments.store') }}">
+    <form id="adjustmentForm" method="POST" action="{{ route('stock-management.store') }}">
       @csrf
       <div class="modal-body">
         <div class="input-group" style="margin-bottom:16px;"><label>Product</label>
@@ -77,7 +116,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeModal('adjustmentModal')">Cancel</button>
-        <button type="submit" class="btn btn-primary"><i class="bx bx-check"></i> Save Adjustment</button>
+        <button type="submit" class="btn btn-primary"><i class="bx bx-check"></i> Save</button>
       </div>
     </form>
   </div>
@@ -100,11 +139,16 @@ document.getElementById('adProduct').addEventListener('change', (e) => {
   stockEl.textContent = opt && opt.value ? `Current stock on hand: ${opt.dataset.stock} units` : '';
 });
 
-function openAdjustmentModal() {
+function openAdjustmentModal(productId) {
   document.getElementById('adjustmentForm').reset();
   document.getElementById('adType').value = 'increase';
   document.querySelectorAll('#adjustmentModal .tab').forEach((t) => t.classList.toggle('active', t.dataset.type === 'increase'));
   document.getElementById('adCurrentStock').textContent = '';
+  if (productId) {
+    const select = document.getElementById('adProduct');
+    select.value = productId;
+    select.dispatchEvent(new Event('change'));
+  }
   openModal('adjustmentModal');
 }
 </script>

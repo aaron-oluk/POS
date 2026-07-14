@@ -50,7 +50,7 @@
         <a href="{{ route('customers.index') }}" class="nav-item {{ request()->routeIs('customers.*') ? 'active' : '' }}"><i class="bx bxs-group"></i><span>Customers</span></a>
         @if (auth()->user()->isManager())
         <a href="{{ route('purchases.index') }}" class="nav-item {{ request()->routeIs('purchases.*') ? 'active' : '' }}"><i class="bx bxs-truck"></i><span>Purchasing</span></a>
-        <a href="{{ route('stock-adjustments.index') }}" class="nav-item {{ request()->routeIs('stock-adjustments.*') ? 'active' : '' }}"><i class="bx bxs-edit-alt"></i><span>Stock Adjustments</span></a>
+        <a href="{{ route('stock-management.index') }}" class="nav-item {{ request()->routeIs('stock-management.*') ? 'active' : '' }}"><i class="bx bxs-archive"></i><span>Stock Management</span></a>
         <a href="{{ route('modifiers.index') }}" class="nav-item {{ request()->routeIs('modifiers.*') ? 'active' : '' }}"><i class="bx bx-slider-alt"></i><span>Modifiers</span></a>
         <a href="{{ route('staff.index') }}" class="nav-item {{ request()->routeIs('staff.*') ? 'active' : '' }}"><i class="bx bxs-briefcase"></i><span>Staff</span></a>
         @endif

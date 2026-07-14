@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
 use App\Models\PurchasePayment;
+use App\Models\StockAdjustment;
 use App\Models\Supplier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -97,6 +98,9 @@ class PurchaseController extends Controller
                 ]);
             }
 
+            $supplierName = Supplier::find($data['supplier_id'])->name;
+            $noteSuffix = ($data['reference_no'] ?? null) ? " (Ref: {$data['reference_no']})" : '';
+
             foreach ($data['items'] as $item) {
                 $product = $products->get($item['product_id']);
 
@@ -109,8 +113,22 @@ class PurchaseController extends Controller
                     'total' => round($item['quantity'] * $item['unit_cost'], 2),
                 ]);
 
+                $stockBefore = $product->stock;
                 $product->increment('stock', $item['quantity']);
                 $product->update(['cost' => $item['unit_cost']]);
+
+                // Every stock-increasing event should show up in one place
+                // (Stock Management's history), not just the Purchases page.
+                StockAdjustment::create([
+                    'product_id' => $product->id,
+                    'user_id' => $request->user()->id,
+                    'type' => 'increase',
+                    'reason' => 'purchase',
+                    'quantity' => $item['quantity'],
+                    'stock_before' => $stockBefore,
+                    'stock_after' => $stockBefore + $item['quantity'],
+                    'notes' => "Purchase from {$supplierName}{$noteSuffix}",
+                ]);
             }
         });
 

@@ -9,17 +9,22 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
-class StockAdjustmentController extends Controller
+class StockManagementController extends Controller
 {
     public function index(): View
     {
+        $products = Product::with('category')->orderBy('name')->get();
         $adjustments = StockAdjustment::with('product', 'user')
             ->latest()
             ->paginate(15);
 
-        return view('stock-adjustments.index', [
+        return view('stock-management.index', [
+            'products' => $products,
             'adjustments' => $adjustments,
-            'products' => Product::orderBy('name')->get(['id', 'name', 'icon', 'stock']),
+            'totalProducts' => $products->count(),
+            'lowStockCount' => $products->filter(fn ($p) => $p->stock_status === 'low')->count(),
+            'outOfStockCount' => $products->filter(fn ($p) => $p->stock_status === 'out')->count(),
+            'inventoryValue' => $products->sum(fn ($p) => $p->stock * (float) $p->cost),
         ]);
     }
 

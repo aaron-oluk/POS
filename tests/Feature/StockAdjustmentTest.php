@@ -32,7 +32,7 @@ class StockAdjustmentTest extends TestCase
         $manager = User::factory()->create(['role' => 'manager', 'active' => true]);
         $product = $this->makeProduct(10);
 
-        $response = $this->actingAs($manager)->post('/stock-adjustments', [
+        $response = $this->actingAs($manager)->post('/stock-management', [
             'product_id' => $product->id,
             'type' => 'decrease',
             'reason' => 'waste',
@@ -57,7 +57,7 @@ class StockAdjustmentTest extends TestCase
         $manager = User::factory()->create(['role' => 'manager', 'active' => true]);
         $product = $this->makeProduct(2);
 
-        $this->actingAs($manager)->post('/stock-adjustments', [
+        $this->actingAs($manager)->post('/stock-management', [
             'product_id' => $product->id,
             'type' => 'decrease',
             'reason' => 'theft',
@@ -72,6 +72,6 @@ class StockAdjustmentTest extends TestCase
     {
         $cashier = User::factory()->create(['role' => 'cashier', 'active' => true]);
 
-        $this->actingAs($cashier)->get('/stock-adjustments')->assertForbidden();
+        $this->actingAs($cashier)->get('/stock-management')->assertForbidden();
     }
 }

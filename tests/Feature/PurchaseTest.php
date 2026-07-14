@@ -44,6 +44,14 @@ class PurchaseTest extends TestCase
         $this->assertDatabaseHas('purchases', ['supplier_id' => $supplier->id, 'reference_no' => 'INV-1001', 'total' => 19.00]);
         $this->assertSame('2026-07-08', Purchase::first()->supply_date->format('Y-m-d'));
         $this->assertDatabaseHas('purchase_items', ['product_id' => $product->id, 'quantity' => 20, 'unit_cost' => 0.95]);
+        $this->assertDatabaseHas('stock_adjustments', [
+            'product_id' => $product->id,
+            'type' => 'increase',
+            'reason' => 'purchase',
+            'quantity' => 20,
+            'stock_before' => 10,
+            'stock_after' => 30,
+        ]);
 
         // "Amount Paid" left blank defaults to paid-in-full, matching the pre-payment-tracking behavior.
         $purchase = Purchase::first();

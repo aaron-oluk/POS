@@ -22,6 +22,6 @@ class StockAdjustment extends Model
 
     public static function reasonLabel(string $reason): string
     {
-        return ['waste' => 'Waste', 'damage' => 'Damage', 'theft' => 'Theft', 'recount' => 'Recount', 'other' => 'Other'][$reason] ?? ucfirst($reason);
+        return ['purchase' => 'Purchase', 'waste' => 'Waste', 'damage' => 'Damage', 'theft' => 'Theft', 'recount' => 'Recount', 'other' => 'Other'][$reason] ?? ucfirst($reason);
     }
 }

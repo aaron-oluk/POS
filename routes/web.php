@@ -14,7 +14,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SelfCheckoutController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StaffController;
-use App\Http\Controllers\StockAdjustmentController;
+use App\Http\Controllers\StockManagementController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 
@@ -73,8 +73,8 @@ Route::middleware('auth')->group(function () {
         Route::put('/suppliers/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');
         Route::delete('/suppliers/{supplier}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
 
-        Route::get('/stock-adjustments', [StockAdjustmentController::class, 'index'])->name('stock-adjustments.index');
-        Route::post('/stock-adjustments', [StockAdjustmentController::class, 'store'])->name('stock-adjustments.store');
+        Route::get('/stock-management', [StockManagementController::class, 'index'])->name('stock-management.index');
+        Route::post('/stock-management', [StockManagementController::class, 'store'])->name('stock-management.store');
 
         Route::get('/modifiers', [ModifierGroupController::class, 'index'])->name('modifiers.index');
         Route::post('/modifiers', [ModifierGroupController::class, 'store'])->name('modifiers.store');
