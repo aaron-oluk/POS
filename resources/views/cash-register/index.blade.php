@@ -16,7 +16,7 @@
     <div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
         <span class="badge badge-success">Register Open</span>
-        <span style="color:var(--fg-muted);font-size:12px;">since {{ $openSession->opened_at->format('M j, Y g:i A') }}</span>
+        <span style="color:var(--fg-muted);font-size:12px;">since @localTime($openSession->opened_at, 'M j, Y g:i A')</span>
       </div>
       <div class="grid grid-3" style="gap:24px;margin-top:12px;">
         <div><div class="stat-label">Opening Float</div><div style="font-family:'Figtree';font-size:20px;font-weight:700;">@money($openSession->opening_float)</div></div>
@@ -50,8 +50,8 @@
         @forelse ($history as $s)
         <tr>
           @if(auth()->user()->isManager())<td style="font-weight:600;">{{ $s->user->name }}</td>@endif
-          <td style="color:var(--fg-muted);">{{ $s->opened_at->format('M j, g:i A') }}</td>
-          <td style="color:var(--fg-muted);">{{ $s->closed_at->format('M j, g:i A') }}</td>
+          <td style="color:var(--fg-muted);">@localTime($s->opened_at, 'M j, g:i A')</td>
+          <td style="color:var(--fg-muted);">{{ $s->closed_at ? \App\Models\Setting::current()->localTime($s->closed_at, 'M j, g:i A') : '—' }}</td>
           <td>@money($s->opening_float)</td>
           <td>@money($s->expected_cash)</td>
           <td>@money($s->counted_cash)</td>

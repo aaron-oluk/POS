@@ -13,8 +13,12 @@ class SettingSeeder extends Seeder
     {
         $currency = CurrencyDetector::detect();
 
-        Setting::create([
-            'id' => 1,
+        // Setting::current() auto-creates a default row (id=1) via
+        // firstOrCreate() the first time anything touches settings — which
+        // may well have already happened before this seeder runs (e.g. the
+        // app was visited once post-deploy). A plain create() then collides
+        // with that row; updateOrCreate() overwrites it instead of failing.
+        Setting::updateOrCreate(['id' => 1], [
             'store_name' => 'Nexus Coffee & Co.',
             'phone' => '+1 (555) 123-4567',
             'email' => 'hello@nexuscoffee.com',
