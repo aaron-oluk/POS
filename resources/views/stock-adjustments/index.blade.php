@@ -24,7 +24,7 @@
           <td style="font-family:'Figtree';font-weight:600;">{{ $a->type === 'increase' ? '+' : '-' }}{{ $a->quantity }}</td>
           <td style="color:var(--fg-muted);">{{ $a->stock_before }} → {{ $a->stock_after }}</td>
           <td>{{ $a->user->name }}</td>
-          <td style="color:var(--fg-muted);">{{ $a->created_at->format('M j, Y g:i A') }}</td>
+          <td style="color:var(--fg-muted);">@localTime($a->created_at, 'M j, Y g:i A')</td>
           <td style="color:var(--fg-muted);font-size:11px;">{{ $a->notes ?? '—' }}</td>
         </tr>
         @empty

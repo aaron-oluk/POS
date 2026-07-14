@@ -12,11 +12,30 @@
     <a href="{{ route('pos.index') }}" class="btn btn-primary btn-sm"><i class="bx bx-plus"></i> New Order</a>
   </div>
 </div>
+@php
+  $dateRangeLabels = ['all' => 'All Time', 'today' => 'Today', 'yesterday' => 'Yesterday', '7days' => 'Last 7 Days', '30days' => 'Last 30 Days'];
+  $rangeLink = fn ($key) => route('orders.index', array_filter(['status' => $status, 'range' => $key]));
+@endphp
 <div class="card" style="margin-bottom:16px;">
   <div class="filter-bar">
     @foreach (['all' => 'All', 'completed' => 'Completed', 'pending' => 'Pending', 'refunded' => 'Refunded', 'cancelled' => 'Cancelled'] as $key => $label)
-      <a href="{{ route('orders.index', ['status' => $key]) }}" class="filter-chip {{ $status === $key ? 'active' : '' }}">{{ $label }}</a>
+      <a href="{{ route('orders.index', array_filter(['status' => $key, 'range' => $range !== 'all' ? $range : null, 'date_from' => $dateFrom, 'date_to' => $dateTo])) }}" class="filter-chip {{ $status === $key ? 'active' : '' }}">{{ $label }}</a>
     @endforeach
+  </div>
+  <div class="filter-bar" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+    @foreach ($dateRangeLabels as $key => $label)
+      <a href="{{ $rangeLink($key) }}" class="filter-chip {{ ! $dateFrom && ! $dateTo && $range === $key ? 'active' : '' }}">{{ $label }}</a>
+    @endforeach
+    <form method="GET" style="display:flex;align-items:center;gap:6px;margin-left:auto;flex-wrap:wrap;">
+      <input type="hidden" name="status" value="{{ $status }}">
+      <input type="datetime-local" name="date_from" class="input-field" style="width:auto;height:32px;font-size:12px;padding:4px 8px;" value="{{ $dateFrom }}">
+      <span style="color:var(--fg-dim);font-size:12px;">to</span>
+      <input type="datetime-local" name="date_to" class="input-field" style="width:auto;height:32px;font-size:12px;padding:4px 8px;" value="{{ $dateTo }}">
+      <button type="submit" class="btn btn-secondary btn-sm">Apply</button>
+      @if ($dateFrom || $dateTo)
+        <a href="{{ $rangeLink('all') }}" class="btn btn-secondary btn-sm" aria-label="Clear date filter" data-tooltip="Clear date filter"><i class="bx bx-x"></i></a>
+      @endif
+    </form>
   </div>
 </div>
 <div class="card">
@@ -32,7 +51,7 @@
           <td style="font-family:'Figtree';font-weight:600;">@money($o->total)</td>
           <td><span class="badge {{ $o->payment_method === 'split' ? 'badge-info' : 'badge-muted' }}" @if($o->payment_method === 'split') data-tooltip="{{ $o->payments->map(fn($p) => \App\Models\Order::paymentLabel($p->method).' '.\App\Models\Setting::current()->money($p->amount))->implode(', ') }}" @endif>{{ $o->payment_summary }}</span></td>
           <td><span class="badge badge-{{ ['completed'=>'success','pending'=>'warning','refunded'=>'danger','cancelled'=>'muted'][$o->status] }}">{{ ucfirst($o->status) }}</span></td>
-          <td style="color:var(--fg-muted);font-size:12px;">{{ $o->created_at->format('M j, g:i A') }}</td>
+          <td style="color:var(--fg-muted);font-size:12px;">@localTime($o->created_at, 'M j, g:i A')</td>
           <td>
             <div style="display:flex;gap:4px;">
               <button class="btn btn-secondary btn-sm btn-icon" onclick="showOrderDetail({{ $o->id }})" aria-label="View" data-tooltip="View"><i class="bx bxs-show" style="font-size:11px;"></i></button>
@@ -77,7 +96,7 @@ async function showOrderDetail(id) {
     const res = await fetch(`/orders/${id}`, { headers: { Accept: 'application/json' } });
     const o = await res.json();
     const statusBadge = { completed: 'badge-success', pending: 'badge-warning', refunded: 'badge-danger', cancelled: 'badge-muted' }[o.status];
-    const dateStr = new Date(o.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const dateStr = new Date(o.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: window.storeTimezone });
     document.getElementById('orderDetailContent').innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
         <div><div style="font-family:'Figtree';font-size:20px;font-weight:700;">${o.order_number}</div><div style="font-size:12px;color:var(--fg-muted);">${dateStr}</div></div>

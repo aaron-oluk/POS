@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -10,10 +11,27 @@ use Illuminate\View\View;
 
 class OrderController extends Controller
 {
+    /**
+     * Rolling windows for the quick date-range chips. "today"/"yesterday" are
+     * calendar days; the others are trailing N-day windows ending today, to
+     * match the dashboard's own "last 7 days" framing.
+     */
+    private const DATE_RANGES = [
+        'today' => [0, 0],
+        'yesterday' => [1, 1],
+        '7days' => [6, 0],
+        '30days' => [29, 0],
+    ];
+
     public function index(Request $request): View
     {
+        $settings = Setting::current();
         $status = $request->get('status', 'all');
         $search = $request->get('q');
+        $range = $request->get('range', 'all');
+        $dateFrom = $request->get('date_from');
+        $dateTo = $request->get('date_to');
+        $hasCustomRange = $dateFrom || $dateTo;
 
         $orders = Order::with('customer', 'payments')
             ->when($status !== 'all', fn ($q) => $q->where('status', $status))
@@ -24,6 +42,19 @@ class OrderController extends Controller
                     });
                 });
             })
+            // date_from/date_to come from <input type="datetime-local"> with no
+            // timezone info — treat them as store-local wall-clock time.
+            ->when($hasCustomRange, function ($q) use ($settings, $dateFrom, $dateTo) {
+                $q->when($dateFrom, fn ($q) => $q->where('created_at', '>=', $settings->parseLocal($dateFrom)))
+                    ->when($dateTo, fn ($q) => $q->where('created_at', '<=', $settings->parseLocal($dateTo)));
+            })
+            ->when(! $hasCustomRange && array_key_exists($range, self::DATE_RANGES), function ($q) use ($settings, $range) {
+                [$daysFrom, $daysTo] = self::DATE_RANGES[$range];
+                $q->whereBetween('created_at', [
+                    $settings->localToday()->subDays($daysFrom)->utc(),
+                    $settings->localToday()->subDays($daysTo)->addDay()->utc(),
+                ]);
+            })
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -31,6 +62,9 @@ class OrderController extends Controller
         return view('orders.index', [
             'orders' => $orders,
             'status' => $status,
+            'range' => $hasCustomRange ? null : $range,
+            'dateFrom' => $dateFrom,
+            'dateTo' => $dateTo,
         ]);
     }
 

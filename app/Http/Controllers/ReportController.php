@@ -27,24 +27,30 @@ class ReportController extends Controller
         $period = $request->get('period', 'week');
         $data = $this->gather($period);
         $data['settings'] = Setting::current();
-        $data['generatedAt'] = now();
+        $data['generatedAt'] = $data['settings']->localNow();
         $data['insights'] = $this->buildInsights($data, $period);
 
         $pdf = Pdf::loadView('reports.pdf', $data)->setPaper('a4');
 
-        $filename = 'report-'.$period.'-'.now()->format('Y-m-d').'.pdf';
+        $filename = 'report-'.$period.'-'.$data['generatedAt']->format('Y-m-d').'.pdf';
 
         return $pdf->download($filename);
     }
 
     private function gather(string $period): array
     {
-        $from = match ($period) {
-            'today' => Carbon::today(),
-            'month' => Carbon::today()->startOfMonth(),
-            'year' => Carbon::today()->startOfYear(),
-            default => Carbon::today()->subDays(6),
-        };
+        $settings = Setting::current();
+        $localToday = $settings->localToday();
+
+        // Boundary is a single instant compared with >=, so it needs its own
+        // ->utc() conversion (unlike localDayRange(), which already returns
+        // UTC-converted bounds for a whereBetween pair).
+        $from = (match ($period) {
+            'today' => $localToday->copy(),
+            'month' => $localToday->copy()->startOfMonth(),
+            'year' => $localToday->copy()->startOfYear(),
+            default => $localToday->copy()->subDays(6),
+        })->utc();
 
         $orders = Order::with('items')
             ->where('created_at', '>=', $from)
@@ -56,7 +62,7 @@ class ReportController extends Controller
         $totalTips = (clone $orders)->sum('tip');
 
         $hourlyTotals = (clone $orders)->get()
-            ->groupBy(fn ($o) => (int) $o->created_at->format('G'))
+            ->groupBy(fn ($o) => (int) $settings->toLocal($o->created_at)->format('G'))
             ->map(fn ($group) => (float) $group->sum('total'));
 
         $hourRange = collect(range(8, 19));

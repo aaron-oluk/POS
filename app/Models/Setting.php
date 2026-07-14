@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Support\CurrencyDetector;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class Setting extends Model
 {
@@ -58,5 +59,71 @@ class Setting extends Model
         $symbol = (string) $this->currency_symbol;
 
         return mb_strlen($symbol) > 1 ? "{$symbol} {$formatted}" : "{$symbol}{$formatted}";
+    }
+
+    /**
+     * Timestamps are stored and cast in the app's fixed UTC timezone
+     * (config('app.timezone')) for internal consistency; this converts one
+     * to the store's actual location for display, since that's the wall-clock
+     * time staff and customers there actually experience.
+     */
+    public function toLocal(\DateTimeInterface $date): Carbon
+    {
+        return Carbon::parse($date)->setTimezone($this->timezone);
+    }
+
+    public function localTime(\DateTimeInterface $date, string $format = 'M j, Y g:i A'): string
+    {
+        return $this->toLocal($date)->format($format);
+    }
+
+    /**
+     * The current moment in the store's timezone — use instead of now()/
+     * Carbon::today() when computing "today"/"this week" boundaries, so they
+     * line up with the store's actual calendar day rather than UTC's.
+     */
+    public function localNow(): Carbon
+    {
+        return Carbon::now($this->timezone);
+    }
+
+    public function localToday(): Carbon
+    {
+        return Carbon::today($this->timezone);
+    }
+
+    /**
+     * [start, end) UTC instants bounding a calendar day in the store's
+     * timezone, for whereBetween('created_at', ...) queries against the
+     * UTC-stored column — whereDate()/direct-equality comparisons operate on
+     * the raw stored string, so they silently use UTC's day boundary instead
+     * of the store's unless converted like this first.
+     * $daysAgo=0 -> today, 1 -> yesterday, etc.
+     */
+    public function localDayRange(int $daysAgo = 0): array
+    {
+        $start = $this->localToday()->subDays($daysAgo);
+
+        return [$start->copy()->utc(), $start->copy()->addDay()->utc()];
+    }
+
+    /**
+     * UTC instant marking the start of a trailing N-day window ending today
+     * (inclusive) in the store's timezone, e.g. localDaysAgo(6) for "last 7
+     * days" used alongside where('created_at', '>=', ...).
+     */
+    public function localDaysAgo(int $days): Carbon
+    {
+        return $this->localToday()->subDays($days)->utc();
+    }
+
+    /**
+     * Parse a naive datetime string (e.g. from a <input type="datetime-local">
+     * with no timezone info) as the store's local time, converted to UTC for
+     * comparison against the UTC-stored column.
+     */
+    public function parseLocal(string $dateString): Carbon
+    {
+        return Carbon::parse($dateString, $this->timezone)->utc();
     }
 }

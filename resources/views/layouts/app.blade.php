@@ -24,6 +24,7 @@
     if (saved) document.documentElement.dataset.theme = saved;
   })();
   window.currency = @json($__currencyConfig);
+  window.storeTimezone = @json($__settings->timezone);
 </script>
 @stack('head')
 </head>
@@ -99,7 +100,7 @@
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
-<div id="flashData" data-success="{{ session('success') }}" data-error="{{ session('error') }}" style="display:none;"></div>
+<div id="flashData" data-success="{{ session('success') }}" data-error="{{ session('error') ?? ($errors->any() ? $errors->first() : '') }}" style="display:none;"></div>
 
 <div class="modal-overlay" id="confirmModal">
   <div class="modal" style="max-width:400px;">

@@ -38,8 +38,17 @@ return [
             'database' => env('DB_DATABASE', database_path('database.sqlite')),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
-            'busy_timeout' => null,
-            'journal_mode' => null,
+            // The queue worker (php artisan queue:listen) polls the same
+            // sqlite file the web process writes sessions to on every
+            // request. Without these, a request landing mid-write from the
+            // other process gets "database is locked" immediately instead of
+            // waiting — which was surfacing as intermittent CSRF (419)
+            // failures on form submits, since the session save would
+            // silently fail. WAL lets readers and the writer coexist;
+            // busy_timeout makes a genuine write clash retry instead of
+            // failing outright.
+            'busy_timeout' => 5000,
+            'journal_mode' => 'wal',
             'synchronous' => null,
             'transaction_mode' => 'DEFERRED',
         ],

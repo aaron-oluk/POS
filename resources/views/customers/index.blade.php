@@ -43,7 +43,7 @@
         <tr>
           <td><div style="display:flex;align-items:center;gap:10px;">
             <div class="avatar" style="background:{{ $c->color }};color:#0f1117;">{{ $c->initials }}</div>
-            <div><div style="font-weight:600;">{{ $c->full_name }}</div><div style="font-size:11px;color:var(--fg-dim);">Since {{ $c->created_at->format('Y-m-d') }}</div></div>
+            <div><div style="font-weight:600;">{{ $c->full_name }}</div><div style="font-size:11px;color:var(--fg-dim);">Since @localTime($c->created_at, 'Y-m-d')</div></div>
           </div></td>
           <td style="color:var(--fg-muted);">{{ $c->email }}</td>
           <td style="color:var(--fg-muted);">{{ $c->phone }}</td>

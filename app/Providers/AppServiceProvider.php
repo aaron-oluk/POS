@@ -25,5 +25,11 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('money', function (string $expression) {
             return "<?php echo \App\Models\Setting::current()->money({$expression}); ?>";
         });
+
+        // Formats a UTC-stored timestamp in the store's configured timezone,
+        // e.g. @localTime($order->created_at, 'M j, g:i A').
+        Blade::directive('localTime', function (string $expression) {
+            return "<?php echo \App\Models\Setting::current()->localTime({$expression}); ?>";
+        });
     }
 }

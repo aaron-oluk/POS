@@ -571,7 +571,7 @@ document.getElementById('processPayBtn').addEventListener('click', async () => {
 });
 
 function showReceipt(order) {
-    const dateStr = new Date(order.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const dateStr = new Date(order.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: window.storeTimezone });
     const itemsHtml = order.items.map((it) => `
         <div class="receipt-row"><span>${it.name}${it.modifiers && it.modifiers.length ? ' ('+it.modifiers.join(', ')+')' : ''} x${it.qty}</span><span>${window.formatMoney(it.total)}</span></div>
     `).join('');

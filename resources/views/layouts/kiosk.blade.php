@@ -22,6 +22,7 @@
     if (saved) document.documentElement.dataset.theme = saved;
   })();
   window.currency = @json($__currencyConfig);
+  window.storeTimezone = @json($settings->timezone);
 </script>
 @stack('head')
 </head>
