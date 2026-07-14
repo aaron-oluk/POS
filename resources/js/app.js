@@ -142,6 +142,17 @@ window.closeModal = function (id) {
     document.getElementById(id)?.classList.remove('show');
 };
 
+// ===== PASSWORD VISIBILITY TOGGLE =====
+// Expects the toggle <button> to be the input's next sibling (see .password-field markup).
+window.togglePasswordVisibility = function (btn) {
+    const input = btn.previousElementSibling;
+    const showing = input.type === 'text';
+    input.type = showing ? 'password' : 'text';
+    btn.innerHTML = showing ? '<i class="bx bx-hide"></i>' : '<i class="bx bx-show"></i>';
+    btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+    btn.dataset.tooltip = showing ? 'Show password' : 'Hide password';
+};
+
 // ===== CONFIRM DIALOG (replaces native confirm()) =====
 let pendingConfirmResolve = null;
 

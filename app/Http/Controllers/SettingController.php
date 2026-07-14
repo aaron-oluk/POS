@@ -14,11 +14,24 @@ class SettingController extends Controller
 {
     public function edit(): View
     {
+        $timezoneGroups = CurrencyDetector::groupedTimezones();
+
+        // Flat {timezoneId: currencyCode} map so the Settings page can
+        // auto-fill Currency when Timezone changes (e.g. picking
+        // "Africa/Kampala" auto-selects UGX), without an extra request.
+        $timezoneCurrencyMap = collect($timezoneGroups)
+            ->collapse()
+            ->keys()
+            ->mapWithKeys(fn ($tz) => [$tz => CurrencyDetector::currencyForTimezone($tz)['code'] ?? null])
+            ->filter()
+            ->all();
+
         return view('settings.edit', [
             'settings' => Setting::current(),
             'categories' => Category::orderBy('name')->get(),
             'currencies' => CurrencyDetector::supportedCurrencies(),
-            'timezoneGroups' => CurrencyDetector::groupedTimezones(),
+            'timezoneGroups' => $timezoneGroups,
+            'timezoneCurrencyMap' => $timezoneCurrencyMap,
         ]);
     }
 

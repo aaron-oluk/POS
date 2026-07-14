@@ -45,7 +45,10 @@
       </div>
       <div class="input-group" style="margin-bottom:20px;">
         <label for="password">Password</label>
-        <input type="password" id="password" name="password" class="input-field" placeholder="••••••••" required>
+        <div class="password-field">
+          <input type="password" id="password" name="password" class="input-field" placeholder="••••••••" required>
+          <button type="button" class="password-toggle" onclick="togglePasswordVisibility(this)" aria-label="Show password" data-tooltip="Show password"><i class="bx bx-hide"></i></button>
+        </div>
       </div>
       <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;">
         <i class="bx bxs-log-in"></i> Sign In
@@ -62,6 +65,15 @@
   </div>
 </div>
 <script>
+  function togglePasswordVisibility(btn) {
+    const input = btn.previousElementSibling;
+    const showing = input.type === 'text';
+    input.type = showing ? 'password' : 'text';
+    btn.innerHTML = showing ? '<i class="bx bx-hide"></i>' : '<i class="bx bx-show"></i>';
+    btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+    btn.dataset.tooltip = showing ? 'Show password' : 'Hide password';
+  }
+
   document.getElementById('showStaffLoginBtn')?.addEventListener('click', () => {
     document.getElementById('choiceView').style.display = 'none';
     document.getElementById('formView').style.display = '';

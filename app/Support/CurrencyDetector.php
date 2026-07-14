@@ -84,6 +84,23 @@ class CurrencyDetector
     }
 
     /**
+     * Resolve the currency conventionally used in a given IANA timezone
+     * (e.g. "Africa/Kampala" -> UGX), for auto-filling the Settings currency
+     * field when the store's timezone is changed. Returns null if the
+     * timezone's region can't be resolved or has no ICU currency data.
+     */
+    public static function currencyForTimezone(string $timezoneId): ?array
+    {
+        if (! class_exists(IntlTimeZone::class)) {
+            return null;
+        }
+
+        $region = IntlTimeZone::getRegion($timezoneId);
+
+        return $region ? static::currencyForCountry($region) : null;
+    }
+
+    /**
      * Curated list of world currencies for the Settings dropdown:
      * [code => ['name' => ..., 'symbol' => ..., 'rate' => ...]].
      */

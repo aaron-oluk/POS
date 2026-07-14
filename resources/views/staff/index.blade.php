@@ -66,7 +66,12 @@
             </select>
           </div>
           <div class="input-group"><label>Phone</label><input type="tel" class="input-field" name="phone" id="sPhone" placeholder="+1 (555) 000-0000"></div>
-          <div class="input-group"><label>Password <span style="font-weight:400;color:var(--fg-dim);">(leave blank to keep current)</span></label><input type="password" class="input-field" name="password" id="sPassword" placeholder="••••••••"></div>
+          <div class="input-group"><label>Password <span style="font-weight:400;color:var(--fg-dim);">(leave blank to keep current)</span></label>
+            <div class="password-field">
+              <input type="password" class="input-field" name="password" id="sPassword" placeholder="••••••••">
+              <button type="button" class="password-toggle" onclick="togglePasswordVisibility(this)" aria-label="Show password" data-tooltip="Show password"><i class="bx bx-hide"></i></button>
+            </div>
+          </div>
         </div>
         <div class="settings-row" style="margin-top:12px;">
           <div><div class="settings-row-label">Active</div><div class="settings-row-desc">Employee can log in and process transactions</div></div>

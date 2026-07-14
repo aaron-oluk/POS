@@ -27,7 +27,7 @@
       <div class="input-group"><label>Email Address</label><input type="email" class="input-field" name="email" value="{{ $settings->email }}"></div>
       <div class="input-group"><label>Address</label><input type="text" class="input-field" name="address" value="{{ $settings->address }}"></div>
       <div class="input-group"><label>Currency</label>
-        <select class="input-field" name="currency">
+        <select class="input-field" name="currency" id="currencySelect">
           @if (! array_key_exists($settings->currency, $currencies))
             <option value="{{ $settings->currency }}" selected>{{ $settings->currency }} ({{ $settings->currency_symbol }}) — detected</option>
           @endif
@@ -36,16 +36,16 @@
           @endforeach
         </select>
       </div>
-      <div class="input-group"><label>Timezone</label>
-        <select class="input-field" name="timezone">
-          @foreach ($timezoneGroups as $group => $zones)
-            <optgroup label="{{ $group }}">
-              @foreach ($zones as $tz => $label)
-                <option value="{{ $tz }}" {{ $settings->timezone === $tz ? 'selected' : '' }}>{{ $label }}</option>
-              @endforeach
-            </optgroup>
-          @endforeach
-        </select>
+      @php
+        $allTimezones = collect($timezoneGroups)->collapse();
+        $currentTzLabel = $allTimezones->get($settings->timezone, $settings->timezone);
+        $timezoneOptions = collect($timezoneGroups)->flatMap(fn ($zones, $group) => collect($zones)->map(fn ($label, $tz) => ['value' => $tz, 'label' => $label, 'group' => $group]))->values();
+      @endphp
+      <div class="input-group searchable-select" id="tzPicker" style="position:relative;">
+        <label for="tzSearchInput">Timezone (Clear to search timezones)</label>
+        <input type="text" class="input-field" id="tzSearchInput" placeholder="Search timezone..." autocomplete="off" value="{{ $currentTzLabel }}">
+        <input type="hidden" name="timezone" id="tzHiddenInput" value="{{ $settings->timezone }}">
+        <div class="searchable-select-results" id="tzResults" style="display:none;"></div>
       </div>
     </div>
     <div style="margin-top:20px;">
@@ -184,6 +184,72 @@ document.querySelectorAll('.tabs .tab').forEach((tab) => {
       if (sec) sec.style.display = t === tab.dataset.tab ? 'block' : 'none';
     });
   });
+});
+
+// ===== Searchable timezone picker =====
+const timezoneOptions = @json($timezoneOptions);
+const timezoneCurrencyMap = @json($timezoneCurrencyMap);
+const tzSearchInput = document.getElementById('tzSearchInput');
+const tzHiddenInput = document.getElementById('tzHiddenInput');
+const tzResults = document.getElementById('tzResults');
+const currencySelect = document.getElementById('currencySelect');
+
+function renderTzResults(query) {
+  const q = query.trim().toLowerCase();
+  const matches = (q ? timezoneOptions.filter((tz) => tz.label.toLowerCase().includes(q) || tz.group.toLowerCase().includes(q)) : timezoneOptions).slice(0, 50);
+
+  if (!matches.length) {
+    tzResults.innerHTML = '<div class="searchable-select-empty">No matching timezone</div>';
+  } else {
+    let lastGroup = null;
+    tzResults.innerHTML = matches.map((tz) => {
+      const groupHeader = tz.group !== lastGroup ? `<div class="searchable-select-group">${tz.group}</div>` : '';
+      lastGroup = tz.group;
+      return `${groupHeader}<div class="searchable-select-option" data-value="${tz.value}" data-label="${tz.label}">${tz.label}</div>`;
+    }).join('');
+  }
+  tzResults.style.display = 'block';
+}
+
+tzSearchInput.addEventListener('focus', () => renderTzResults(''));
+tzSearchInput.addEventListener('input', () => renderTzResults(tzSearchInput.value));
+
+tzResults.addEventListener('mousedown', (e) => {
+  // mousedown (not click) so this runs before the input's blur handler below.
+  const opt = e.target.closest('.searchable-select-option');
+  if (!opt) return;
+  tzHiddenInput.value = opt.dataset.value;
+  tzSearchInput.value = opt.dataset.label;
+  tzResults.style.display = 'none';
+
+  // Picking a location auto-fills the matching currency — the dropdown is
+  // still just a normal <select> afterward, so it can always be changed
+  // manually without anything fighting back (this only fires on timezone
+  // pick, never on its own).
+  const currencyCode = timezoneCurrencyMap[opt.dataset.value];
+  if (currencyCode && [...currencySelect.options].some((o) => o.value === currencyCode)) {
+    currencySelect.value = currencyCode;
+  }
+});
+
+tzSearchInput.addEventListener('blur', () => {
+  // Typed a search that was never picked — snap the visible text back to
+  // whatever's actually going to be submitted, so they don't look out of sync.
+  const current = timezoneOptions.find((tz) => tz.value === tzHiddenInput.value);
+  if (current) tzSearchInput.value = current.label;
+});
+
+document.addEventListener('click', (e) => {
+  if (!document.getElementById('tzPicker').contains(e.target)) {
+    tzResults.style.display = 'none';
+  }
+});
+
+tzSearchInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    tzResults.style.display = 'none';
+    tzSearchInput.blur();
+  }
 });
 </script>
 @endpush
