@@ -7,6 +7,7 @@ use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ProductController extends Controller
@@ -75,8 +76,8 @@ class ProductController extends Controller
             'price' => ['required', 'numeric', 'min:0.01'],
             'cost' => ['nullable', 'numeric', 'min:0'],
             'stock' => ['nullable', 'integer', 'min:0'],
-            'sku' => ['required', 'string', 'max:50', 'unique:products,sku,'.$ignoreId],
-            'barcode' => ['nullable', 'string', 'max:50', 'unique:products,barcode,'.$ignoreId],
+            'sku' => ['required', 'string', 'max:50', Rule::unique('products', 'sku')->ignore($ignoreId)],
+            'barcode' => ['nullable', 'string', 'max:50', Rule::unique('products', 'barcode')->ignore($ignoreId)],
             'description' => ['nullable', 'string'],
         ]);
     }

@@ -6,6 +6,7 @@ use App\Models\Customer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class CustomerController extends Controller
@@ -71,7 +72,7 @@ class CustomerController extends Controller
         return $request->validate([
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'unique:customers,email,'.$ignoreId],
+            'email' => ['nullable', 'email', Rule::unique('customers', 'email')->ignore($ignoreId)],
             'phone' => ['nullable', 'string', 'max:30'],
         ]);
     }

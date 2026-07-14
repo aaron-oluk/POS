@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class StaffController extends Controller
@@ -49,7 +50,7 @@ class StaffController extends Controller
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email,'.$ignoreId],
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($ignoreId)],
             'role' => ['required', 'in:admin,manager,cashier,barista'],
             'phone' => ['nullable', 'string', 'max:30'],
             'active' => ['nullable', 'boolean'],
