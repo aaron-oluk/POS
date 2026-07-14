@@ -53,7 +53,10 @@ class StaffController extends Controller
             'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($ignoreId)],
             'role' => ['required', 'in:admin,manager,cashier,barista'],
             'phone' => ['nullable', 'string', 'max:30'],
-            'active' => ['nullable', 'boolean'],
+            // Not validated here: a real HTML checkbox without a `value`
+            // attribute submits "on" when checked, which Laravel's strict
+            // `boolean` rule rejects. $request->boolean() below normalizes
+            // whatever was sent (checked, unchecked, or absent) correctly.
             'password' => ['nullable', 'string', 'min:6'],
         ]);
     }

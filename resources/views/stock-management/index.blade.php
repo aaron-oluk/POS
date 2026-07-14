@@ -20,6 +20,28 @@
 
 <div class="card" style="margin-bottom:20px;">
   <h3 style="margin-bottom:12px;">Current Inventory</h3>
+  <form method="GET" style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+    <div class="topbar-search" style="max-width:280px;flex:1;">
+      <i class="bx bxs-search"></i>
+      <input type="text" name="q" placeholder="Search products..." value="{{ $search }}">
+    </div>
+    <select class="input-field" style="width:auto;height:38px;" name="category" onchange="this.form.submit()">
+      <option value="">All Categories</option>
+      @foreach ($categories as $c)
+        <option value="{{ $c->name }}" {{ $categoryFilter === $c->name ? 'selected' : '' }}>{{ $c->name }}</option>
+      @endforeach
+    </select>
+    <select class="input-field" style="width:auto;height:38px;" name="stock" onchange="this.form.submit()">
+      <option value="">All Stock</option>
+      <option value="low" {{ $stockFilter === 'low' ? 'selected' : '' }}>Low Stock</option>
+      <option value="out" {{ $stockFilter === 'out' ? 'selected' : '' }}>Out of Stock</option>
+      <option value="ok" {{ $stockFilter === 'ok' ? 'selected' : '' }}>In Stock</option>
+    </select>
+    <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+    @if ($search || $categoryFilter || $stockFilter)
+      <a href="{{ route('stock-management.index') }}" class="btn btn-secondary btn-sm">Clear</a>
+    @endif
+  </form>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Product</th><th>Category</th><th>Cost</th><th>Price</th><th>Stock</th><th>Status</th><th>Value</th><th>Actions</th></tr></thead>
@@ -47,6 +69,7 @@
       </tbody>
     </table>
   </div>
+  {{ $products->links('pagination.custom') }}
 </div>
 
 <div class="card">
@@ -89,7 +112,7 @@
         <div class="input-group" style="margin-bottom:16px;"><label>Product</label>
           <select class="input-field" name="product_id" id="adProduct" required>
             <option value="">Select product...</option>
-            @foreach ($products as $p)
+            @foreach ($allProducts as $p)
               <option value="{{ $p->id }}" data-stock="{{ $p->stock }}">{{ $p->icon }} {{ $p->name }} ({{ $p->stock }} in stock)</option>
             @endforeach
           </select>

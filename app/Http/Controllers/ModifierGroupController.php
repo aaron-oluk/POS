@@ -23,10 +23,10 @@ class ModifierGroupController extends Controller
     {
         $data = $this->validated($request);
 
-        DB::transaction(function () use ($data) {
+        DB::transaction(function () use ($data, $request) {
             $group = ModifierGroup::create([
                 'name' => $data['name'],
-                'multiple' => $data['multiple'] ?? false,
+                'multiple' => $request->boolean('multiple'),
             ]);
 
             $group->options()->createMany($data['options']);
@@ -40,10 +40,10 @@ class ModifierGroupController extends Controller
     {
         $data = $this->validated($request);
 
-        DB::transaction(function () use ($data, $modifier) {
+        DB::transaction(function () use ($data, $modifier, $request) {
             $modifier->update([
                 'name' => $data['name'],
-                'multiple' => $data['multiple'] ?? false,
+                'multiple' => $request->boolean('multiple'),
             ]);
 
             $modifier->options()->delete();
@@ -65,7 +65,9 @@ class ModifierGroupController extends Controller
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'multiple' => ['nullable', 'boolean'],
+            // Not validated here: a real HTML checkbox without a `value`
+            // attribute submits "on" when checked, which Laravel's strict
+            // `boolean` rule rejects. $request->boolean() reads it directly.
             'options' => ['required', 'array', 'min:1'],
             'options.*.name' => ['required', 'string', 'max:255'],
             'options.*.price_delta' => ['required', 'numeric'],
