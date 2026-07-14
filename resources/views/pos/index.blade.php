@@ -158,7 +158,7 @@
     <div class="modal-body" id="receiptContent"></div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('receiptModal')">Close</button>
-      <button class="btn btn-primary" onclick="showToast('Receipt printed','success');closeModal('receiptModal')"><i class="bx bxs-printer"></i> Print</button>
+      <button class="btn btn-primary" onclick="window.print()"><i class="bx bxs-printer"></i> Print</button>
     </div>
   </div>
 </div>

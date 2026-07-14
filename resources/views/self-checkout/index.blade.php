@@ -114,7 +114,8 @@
     </div>
     <div class="modal-body" id="receiptContent"></div>
     <div class="modal-footer">
-      <button class="btn btn-primary" style="width:100%;" onclick="closeModal('receiptModal');window.location.reload();"><i class="bx bx-check"></i> Done</button>
+      <button class="btn btn-secondary" onclick="window.print()"><i class="bx bxs-printer"></i> Print</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="closeModal('receiptModal');window.location.reload();"><i class="bx bx-check"></i> Done</button>
     </div>
   </div>
 </div>

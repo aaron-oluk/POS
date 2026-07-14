@@ -405,6 +405,15 @@ textarea.input-field { height:auto; padding:0.625rem 0.875rem; resize:vertical; 
 .receipt-row { display:flex; justify-content:space-between; margin-bottom:0.1875rem; }
 .receipt-total { font-size:1rem; font-weight:700; }
 
+/* Printing a receipt: hide everything except the receipt content itself so
+   only it ends up on paper, not the sidebar/topbar/modal chrome around it. */
+@media print {
+  body * { visibility:hidden; }
+  #receiptContent, #receiptContent * { visibility:visible; }
+  #receiptContent { position:absolute; top:0; left:0; width:100%; }
+  .receipt { max-width:none; }
+}
+
 /* Toast */
 .toast-container { position:fixed; top:5rem; right:1.5rem; z-index:200; display:flex; flex-direction:column; gap:0.5rem; }
 .toast {

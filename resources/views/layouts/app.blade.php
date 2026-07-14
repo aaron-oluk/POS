@@ -25,6 +25,7 @@
   })();
   window.currency = @json($__currencyConfig);
   window.storeTimezone = @json($__settings->timezone);
+  window.autoPrint = @json($__settings->auto_print);
 </script>
 @stack('head')
 </head>

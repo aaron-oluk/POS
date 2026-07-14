@@ -602,6 +602,7 @@ function showReceipt(order) {
         </div>
     `;
     openModal('receiptModal');
+    if (window.autoPrint) setTimeout(() => window.print(), 300);
 }
 
 document.getElementById('posCustomer')?.addEventListener('change', saveCartState);
